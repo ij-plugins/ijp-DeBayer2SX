@@ -12,7 +12,7 @@ val commonSettings = Seq(
   organization := "net.sf.ij-plugins",
   version := _version,
   scalaVersion := "2.12.7",
-  scalacOptions ++= Seq("-unchecked", "-deprecation", "-Xlint", "-explaintypes"),
+  scalacOptions ++= Seq("-unchecked", "-deprecation", "-Xlint", "-explaintypes" /*, "-opt:l:method"*/),
   javacOptions ++= Seq("-deprecation", "-Xlint"),
   // Some dependencies like `javacpp` are packaged with maven-plugin packaging
   classpathTypes += "maven-plugin",
