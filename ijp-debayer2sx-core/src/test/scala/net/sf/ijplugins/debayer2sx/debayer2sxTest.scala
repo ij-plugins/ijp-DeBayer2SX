@@ -24,6 +24,7 @@ package net.sf.ijplugins.debayer2sx
 
 import ij.IJ
 import ij.process.{ByteProcessor, ColorProcessor}
+import net.sf.ijplugins.debayer2sx.Utils.compare
 import org.scalatest.{FlatSpec, Matchers}
 
 class debayer2sxTest extends FlatSpec with Matchers {
@@ -43,7 +44,7 @@ class debayer2sxTest extends FlatSpec with Matchers {
 
     // Read expected result
     val impRef = IJ.openImage("../data/Lighthouse_bayerGR8.png")
-    assert(imp != null)
+    assert(impRef != null)
     val bpRef = impRef.getProcessor.asInstanceOf[ByteProcessor]
     assert(bpRef != null)
 
@@ -63,7 +64,7 @@ class debayer2sxTest extends FlatSpec with Matchers {
 
     // Read expected result
     val impRef = IJ.openImage("../data/Lighthouse_bayerGR8_expand_bands.png")
-    assert(imp != null)
+    assert(impRef != null)
     val cpRef = impRef.getProcessor.asInstanceOf[ColorProcessor]
     assert(cpRef != null)
 
@@ -71,29 +72,4 @@ class debayer2sxTest extends FlatSpec with Matchers {
   }
 
 
-  def compare(im1: ByteProcessor, im2: ByteProcessor): Unit = {
-    val w = im1.getWidth
-    val h = im1.getHeight
-
-    assert(w == im2.getWidth, "Width should match")
-    assert(h == im2.getHeight, "Height should match")
-
-    for (y <- Range(0, h); x <- Range(0, w)) {
-      assert(im1.get(x, y) == im2.get(x, y), s"Location ($x, $y)")
-    }
-  }
-
-  def compare(im1: ColorProcessor, im2: ColorProcessor): Unit = {
-    val w = im1.getWidth
-    val h = im1.getHeight
-
-    assert(w == im2.getWidth, "Width should match")
-    assert(h == im2.getHeight, "Height should match")
-
-    for (y <- Range(0, h); x <- Range(0, w)) {
-      assert(im1.getColor(x, y).getRed == im2.getColor(x, y).getRed, s"Red Location ($x, $y)")
-      assert(im1.getColor(x, y).getGreen == im2.getColor(x, y).getGreen, s"Green Location ($x, $y)")
-      assert(im1.getColor(x, y).getBlue == im2.getColor(x, y).getBlue, s"Blue Location ($x, $y)")
-    }
-  }
 }
