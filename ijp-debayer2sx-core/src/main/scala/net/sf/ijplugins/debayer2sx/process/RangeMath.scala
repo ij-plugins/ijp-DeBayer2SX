@@ -23,7 +23,7 @@
 package net.sf.ijplugins.debayer2sx.process
 
 /** Overloaded operators for Ranges. */
-class RangeMath(val range: Range) {
+final class RangeMath(val range: Range) {
 
   /** Shift range by a number (add) */
   def +(i: Int): Range = Range(range.start + i, range.end + i, range.step)

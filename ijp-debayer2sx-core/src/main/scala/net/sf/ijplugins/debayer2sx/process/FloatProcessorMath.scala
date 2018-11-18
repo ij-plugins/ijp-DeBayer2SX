@@ -32,7 +32,7 @@ object FloatProcessorMath {
   implicit def toFP(fpm: FloatProcessorMath): FloatProcessor = fpm.fp
 }
 
-class FloatProcessorMath(val fp: FloatProcessor) {
+final class FloatProcessorMath(val fp: FloatProcessor) {
 
   /**
     * Create new FloatProcessor by slicing current processor.

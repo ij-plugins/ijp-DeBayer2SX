@@ -1,3 +1,25 @@
+/*
+ * Image/J Plugins
+ * Copyright (C) 2002-2018 Jarek Sacha
+ * Author's email: jpsacha at gmail [dot] com
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Latest release available at http://sourceforge.net/projects/ij-plugins/
+ */
+
 package net.sf.ijplugins.debayer2sx
 
 import ij.process.{FloatProcessor, ImageProcessor}
@@ -49,15 +71,17 @@ package object process {
     val _srcRangeX = if (srcRangeX == FR) Range(0, srcIP.getWidth) else srcRangeX
     val _srcRangeY = if (srcRangeY == FR) Range(0, srcIP.getHeight) else srcRangeY
 
-    for (x <- _dstRangeX; y <- _dstRangeY) {
-      val indexX = (x - _dstRangeX.start) / _dstRangeX.step
-      val srcX = _srcRangeX.start + indexX * _srcRangeX.step
-
+    for (y <- _dstRangeY) {
       val indexY = (y - _dstRangeY.start) / _dstRangeY.step
       val srcY = _srcRangeY.start + indexY * _srcRangeY.step
 
-      val v = srcIP.getf(srcX, srcY)
-      dstIP.setf(x, y, v)
+      for (x <- _dstRangeX) {
+        val indexX = (x - _dstRangeX.start) / _dstRangeX.step
+        val srcX = _srcRangeX.start + indexX * _srcRangeX.step
+
+        val v = srcIP.getf(srcX, srcY)
+        dstIP.setf(x, y, v)
+      }
     }
   }
 
