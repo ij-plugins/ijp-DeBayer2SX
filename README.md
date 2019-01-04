@@ -1,7 +1,7 @@
 # ijp-DeBayer2SX
 [Bayer-pattern][bayer-filter] image to color image converters.
 
-[![Build Status](https://travis-ci.org/ij-plugins/ijp-DeBayer2SX.svg?branch=develop)](https://travis-ci.org/ij-plugins/ijp-DeBayer2SX) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.sf.ij-plugins/ijp-DeBayer2SX_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.sf.ij-plugins/ijp-DeBayer2SX_2.12)
+[![Build Status](https://travis-ci.org/ij-plugins/ijp-DeBayer2SX.svg?branch=master)](https://travis-ci.org/ij-plugins/ijp-DeBayer2SX) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.sf.ij-plugins/ijp-DeBayer2SX_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.sf.ij-plugins/ijp-DeBayer2SX_2.12)
                                                                                                                                        [![Scaladoc](http://javadoc-badge.appspot.com/net.sf.ij-plugins/ijp-DeBayer2SX_2.12.svg?label=scaladoc)](http://javadoc-badge.appspot.com/net.sf.ij-plugins/ijp-DeBayer2SX_2.12)
 
 
