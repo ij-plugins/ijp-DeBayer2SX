@@ -39,7 +39,7 @@ class debayer2sxTest extends FlatSpec with Matchers {
     assert(cp != null)
 
     // Process
-    val bay = bayerGR(cp)
+    val bay = MakeBayer.bayerGR(cp)
     assert(bay != null)
 
     // Read expected result
