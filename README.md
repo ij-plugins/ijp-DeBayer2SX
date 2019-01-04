@@ -1,5 +1,9 @@
 # ijp-DeBayer2SX
-Raw Bayer-pattern image to color image converters.
+[Bayer-pattern][bayer-filter] image to color image converters.
+
+[![Build Status](https://travis-ci.org/ij-plugins/ijp-DeBayer2SX.svg?branch=develop)](https://travis-ci.org/ij-plugins/ijp-DeBayer2SX) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.sf.ij-plugins/ijp-DeBayer2SX_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.sf.ij-plugins/ijp-DeBayer2SX_2.12)
+                                                                                                                                       [![Scaladoc](http://javadoc-badge.appspot.com/net.sf.ij-plugins/ijp-DeBayer2SX_2.12.svg?label=scaladoc)](http://javadoc-badge.appspot.com/net.sf.ij-plugins/ijp-DeBayer2SX_2.12)
+
 
 Demasaicing (Bayer patter reconstruction) algorithms implemented, all support 8 bit and 16 bit input:
 
@@ -19,5 +23,5 @@ Plugins install by default under "plugins" > "IJ-Plugins"
 * __DeBayer2__ - convert Bayer-pattern image to color image using various algorithms.
 * __Make Bayer__ - convert color image to a Bayer-pattern image.
 
-
+[bayer-filter]: https://en.wikipedia.org/wiki/Bayer_filter
 [debayer]: http://umanitoba.ca/faculties/science/astronomy/jwest/plugins.html
