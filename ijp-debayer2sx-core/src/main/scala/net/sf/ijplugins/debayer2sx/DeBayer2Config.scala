@@ -61,17 +61,17 @@ object DeBayer2Config {
     val values: immutable.IndexedSeq[MosaicOrder] = findValues
     val names: Array[String] = values.map(_.entryName).toArray
 
-    case object R_G extends MosaicOrder("R-G")
-
     case object B_G extends MosaicOrder("B-G")
+
+    case object G_B extends MosaicOrder("G-B")
 
     case object G_R extends MosaicOrder("G-R")
 
-    case object G_B extends MosaicOrder("G-B")
+    case object R_G extends MosaicOrder("R-G")
 
   }
 
 }
 
-case class DeBayer2Config(mosaicOrder: MosaicOrder = MosaicOrder.G_R,
+case class DeBayer2Config(mosaicOrder: MosaicOrder = MosaicOrder.R_G,
                           demosaicing: Demosaicing = Demosaicing.DDFAPD)

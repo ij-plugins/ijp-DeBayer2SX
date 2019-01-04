@@ -30,7 +30,7 @@ import net.sf.ijplugins.debayer2sx.DeBayer2Config.MosaicOrder
 import net.sf.ijplugins.util.IJPUtils
 
 object MakeBayerPlugin {
-  private var mosaicOrder: MosaicOrder = MosaicOrder.G_R
+  private var mosaicOrder: MosaicOrder = MosaicOrder.R_G
 }
 
 class MakeBayerPlugin extends PlugIn {

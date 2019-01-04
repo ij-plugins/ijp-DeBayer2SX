@@ -1,6 +1,6 @@
 /*
  * Image/J Plugins
- * Copyright (C) 2002-2018 Jarek Sacha
+ * Copyright (C) 2002-2019 Jarek Sacha
  * Author's email: jpsacha at gmail [dot] com
  *
  * This library is free software; you can redistribute it and/or
@@ -22,7 +22,11 @@
 
 package net.sf.ijplugins.debayer2sx
 
-import ij.process.{ByteProcessor, ColorProcessor}
+import java.io.File
+
+import ij.process.{Blitter, ByteProcessor, ColorBlitter, ColorProcessor}
+import ij.{IJ, ImagePlus}
+import org.scalactic.Requirements._
 
 object Utils {
 
@@ -51,4 +55,42 @@ object Utils {
       assert(im1.getColor(x, y).getBlue == im2.getColor(x, y).getBlue, s"Blue Location ($x, $y)")
     }
   }
+
+  def openColorProcessor(path: String): ColorProcessor = {
+    require(new File(path).exists())
+    val imp = IJ.openImage(path)
+    require(imp != null)
+    require(imp.getStackSize == 1)
+    require(imp.getType == ImagePlus.COLOR_RGB)
+
+    val ip = imp.getProcessor
+    require(ip.isInstanceOf[ColorProcessor])
+
+    ip.asInstanceOf[ColorProcessor]
+  }
+
+  def openByteProcessor(path: String): ByteProcessor = {
+    require(new File(path).exists())
+    val imp = IJ.openImage(path)
+    require(imp != null)
+    require(imp.getStackSize == 1)
+    require(imp.getType == ImagePlus.GRAY8)
+
+    val ip = imp.getProcessor
+    require(ip.isInstanceOf[ByteProcessor])
+
+    ip.asInstanceOf[ByteProcessor]
+  }
+
+  def meanDistance(cp1: ColorProcessor, cp2: ColorProcessor): Double = {
+    require(cp1 != null)
+    require(cp2 != null)
+    require(cp1.getWidth == cp2.getWidth)
+    require(cp1.getHeight == cp2.getHeight)
+
+    val cp = cp1.duplicate().asInstanceOf[ColorProcessor]
+    new ColorBlitter(cp).copyBits(cp2, 0, 0, Blitter.DIFFERENCE)
+    cp.getStatistics.mean
+  }
+
 }

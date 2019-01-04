@@ -1,6 +1,6 @@
 /*
  * Image/J Plugins
- * Copyright (C) 2002-2018 Jarek Sacha
+ * Copyright (C) 2002-2019 Jarek Sacha
  * Author's email: jpsacha at gmail [dot] com
  *
  * This library is free software; you can redistribute it and/or
@@ -24,6 +24,7 @@ package net.sf.ijplugins.debayer2sx
 
 import ij.IJ
 import ij.process.{ByteProcessor, ColorProcessor}
+import net.sf.ijplugins.debayer2sx.DeBayer2Config.MosaicOrder
 import net.sf.ijplugins.debayer2sx.Utils.compare
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -39,7 +40,7 @@ class debayer2sxTest extends FlatSpec with Matchers {
     assert(cp != null)
 
     // Process
-    val bay = MakeBayer.bayerGR(cp)
+    val bay = MakeBayer.process(cp, MosaicOrder.G_R)
     assert(bay != null)
 
     // Read expected result
@@ -70,6 +71,4 @@ class debayer2sxTest extends FlatSpec with Matchers {
 
     compare(cp, cpRef)
   }
-
-
 }
