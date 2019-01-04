@@ -96,8 +96,8 @@ lazy val manifestSetting = packageOptions += {
 
 pomExtra :=
   <scm>
-    <url>https://github.com/ij-plugins/ijp-toolkit</url>
-    <connection>scm:https://github.com/ij-plugins/ijp-toolkit.git</connection>
+    <url>https://github.com/ij-plugins/ijp-DeBayer2SX</url>
+    <connection>scm:https://github.com/ij-plugins/ijp-DeBayer2SX.git</connection>
   </scm>
     <developers>
       <developer>
