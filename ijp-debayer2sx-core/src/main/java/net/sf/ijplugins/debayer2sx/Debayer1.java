@@ -3,121 +3,31 @@
  */
 package net.sf.ijplugins.debayer2sx;
 
-import ij.IJ;
-import ij.ImagePlus;
 import ij.ImageStack;
-import ij.gui.GenericDialog;
-import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 
 /**
- * Debayer ImageJ plugin provide by Jennifer West from University of Manitoba in 2006.
+ * Refactored from ImageJ plugin, Debayer_Image, provided by Jennifer West from University of Manitoba in 2006.
  * http://umanitoba.ca/faculties/science/astronomy/jwest/plugins.html
+ *
+ * Converted to be used as a library rather than a plugin.
  */
 @SuppressWarnings("ALL")
-public class Debayer1 implements PlugInFilter {
-
-    ImagePlus imp;
-    ImageProcessor ip;
-    int width;
-    int height;
-    static boolean normalize = false;
-    static boolean equalize = false;
-    static boolean stackHist = false;
-    static boolean showColour = false;
-    static boolean median = false;
-    static boolean gauss = false;
-    static int med_radius = 2;
-    static int gauss_radius = 2;
-
-    public int setup(String arg, ImagePlus imp) {
-        IJ.register(Debayer1.class);
-        if (IJ.versionLessThan("1.32c"))
-            return DONE;
-        imp.unlock();
-        this.imp = imp;
-        return DOES_16;
-    }
-
-    public void run(ImageProcessor ip) {
-        width = imp.getWidth();
-        height = imp.getHeight();
-        ImageStack rgb = new ImageStack(width, height, imp.getProcessor().getColorModel());
-        String[] orders = {"R-G-R-G", "B-G-B-G", "G-R-G-R", "G-B-G-B"};
-        String[] algorithms = {"Replication", "Bilinear", "Smooth Hue", "Adaptive Smooth Hue"};
-        //boolean showStack = true;
-
-        String options = "";
-
-        GenericDialog dia = new GenericDialog("Debayer...", IJ.getInstance());
-
-        dia.addChoice("Order of first row:", orders, orders[1]);
-        dia.addChoice("Demosaicing algorithm:", algorithms, algorithms[0]);
-        //dia.addCheckbox("Display RGB Stack?", showStack);
-        dia.addMessage("Filter options:");
-        dia.addCheckbox("Apply Median Filter?", median);
-        dia.addCheckbox("Apply Gaussian Filter?", gauss);
-        dia.addNumericField("Radius for Median Filter", med_radius, 2);
-        dia.addNumericField("Radius for Gaussian Filter", gauss_radius, 2);
-        dia.addMessage("Contrast options:");
-        dia.addCheckbox("Normalize Values?", normalize);
-        dia.addCheckbox("Equalize Histogram?", equalize);
-        dia.addCheckbox("Use Stack Histogram?", stackHist);
-        dia.addCheckbox("Display Colour Image?", showColour);
-
-        dia.showDialog();
-
-        if (dia.wasCanceled()) return;
-
-        int row_order = dia.getNextChoiceIndex();
-        int algorithm = dia.getNextChoiceIndex();
-        //showStack = dia.getNextBoolean();
-        median = dia.getNextBoolean();
-        gauss = dia.getNextBoolean();
-        med_radius = (int) dia.getNextNumber();
-        gauss_radius = (int) dia.getNextNumber();
-        normalize = dia.getNextBoolean();
-        equalize = dia.getNextBoolean();
-        stackHist = dia.getNextBoolean();
-        showColour = dia.getNextBoolean();
-
-        options = "saturated=0.5";
-        if (normalize) options = options + " normalize";
-        if (equalize) options = options + " equalize";
-        options = options + " normalize_all";
-        if (stackHist) options = options + " use";
-
-        if (algorithm == 0) rgb = replicate_decode(row_order, imp);
-        else if (algorithm == 1) rgb = average_decode(row_order, imp);
-        else if (algorithm == 2) rgb = smooth_decode(row_order, imp);
-        else if (algorithm == 3) rgb = adaptive_decode(row_order, imp);
-        ImagePlus rgb_imp = imp.createImagePlus();
-        rgb_imp.setStack("RGB Stack", rgb);
-        rgb_imp.setCalibration(imp.getCalibration());
-        rgb_imp.show();
-
-        if (median) IJ.run("Median...", "radius=" + med_radius + " stack");
-        if (gauss) IJ.run("Median...", "radius=" + gauss_radius + " stack");
-        if (normalize || equalize) IJ.run("Enhance Contrast", options);
-
-        if (showColour) IJ.run("Convert Stack to RGB");
-
-    }
+public class Debayer1 {
 
     /**
      * Replication algorithm
      *
-     * @param row_order
+     * @param row_order 0 - "R-G-R-G", 1 - "B-G-B-G", 2 - "G-R-G-R", 2 - "G-B-G-B"
      * @param imp
      * @return
      */
-    public static ImageStack replicate_decode(int row_order, ImagePlus imp) {
-        ImageProcessor ip = imp.getProcessor();
-        int width = imp.getWidth();
-        int height = imp.getHeight();
+    public static ImageStack replicate_decode(int row_order, ImageProcessor ip) {
+        int width = ip.getWidth();
+        int height = ip.getHeight();
         int one = 0;
-        ImageStack rgb = new ImageStack(width, height, imp.getProcessor().getColorModel());
+        ImageStack rgb = new ImageStack(width, height, ip.getColorModel());
         ImageProcessor r = new ShortProcessor(width, height);
         ImageProcessor g = new ShortProcessor(width, height);
         ImageProcessor b = new ShortProcessor(width, height);
@@ -230,16 +140,15 @@ public class Debayer1 implements PlugInFilter {
      * @param imp
      * @return
      */
-    public static ImageStack average_decode(int row_order, ImagePlus imp) {
-        ImageProcessor ip = imp.getProcessor();
-        int width = imp.getWidth();
-        int height = imp.getHeight();
+    public static ImageStack average_decode(int row_order, ImageProcessor ip) {
+        int width = ip.getWidth();
+        int height = ip.getHeight();
 
         int one = 0;
         int two = 0;
         int three = 0;
         int four = 0;
-        ImageStack rgb = new ImageStack(width, height, imp.getProcessor().getColorModel());
+        ImageStack rgb = new ImageStack(width, height, ip.getColorModel());
         ImageProcessor r = new ShortProcessor(width, height);
         ImageProcessor g = new ShortProcessor(width, height);
         ImageProcessor b = new ShortProcessor(width, height);
@@ -384,10 +293,9 @@ public class Debayer1 implements PlugInFilter {
      * @param imp
      * @return
      */
-    public static ImageStack smooth_decode(int row_order, ImagePlus imp) {
-        ImageProcessor ip = imp.getProcessor();
-        int width = imp.getWidth();
-        int height = imp.getHeight();
+    public static ImageStack smooth_decode(int row_order, ImageProcessor ip) {
+        int width = ip.getWidth();
+        int height = ip.getHeight();
         double G1 = 0;
         double G2 = 0;
         double G3 = 0;
@@ -405,7 +313,7 @@ public class Debayer1 implements PlugInFilter {
         double R2 = 0;
         double R3 = 0;
         double R4 = 0;
-        ImageStack rgb = new ImageStack(width, height, imp.getProcessor().getColorModel());
+        ImageStack rgb = new ImageStack(width, height, ip.getColorModel());
         ImageProcessor r = new ShortProcessor(width, height);
         ImageProcessor g = new ShortProcessor(width, height);
         ImageProcessor b = new ShortProcessor(width, height);
@@ -606,10 +514,10 @@ public class Debayer1 implements PlugInFilter {
     }
 
 
-    public static ImageStack adaptive_decode(int row_order, ImagePlus imp) {            //Adaptive Smooth Hue algorithm (Edge detecting)
-        ImageProcessor ip = imp.getProcessor();
-        int width = imp.getWidth();
-        int height = imp.getHeight();
+    public static ImageStack adaptive_decode(int row_order, ImageProcessor ip) {
+        //Adaptive Smooth Hue algorithm (Edge detecting)
+        int width = ip.getWidth();
+        int height = ip.getHeight();
         double G1 = 0;
         double G2 = 0;
         double G3 = 0;
@@ -633,7 +541,7 @@ public class Debayer1 implements PlugInFilter {
         double S = 0;
         double E = 0;
         double W = 0;
-        ImageStack rgb = new ImageStack(width, height, imp.getProcessor().getColorModel());
+        ImageStack rgb = new ImageStack(width, height, ip.getColorModel());
         ImageProcessor r = new ShortProcessor(width, height);
         ImageProcessor g = new ShortProcessor(width, height);
         ImageProcessor b = new ShortProcessor(width, height);

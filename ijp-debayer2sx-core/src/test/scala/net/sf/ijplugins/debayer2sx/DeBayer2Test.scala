@@ -41,26 +41,37 @@ class DeBayer2Test extends FlatSpec with Matchers with BeforeAndAfter {
 
   it should "DDFAPDRefined BG" in {
     val bayCP = openByteProcessor("../data/Lighthouse_bayerBG8.png")
-    val dstIP = DeBayer2.process(bayCP, DeBayer2Config(MosaicOrder.B_G, Demosaicing.DDFAPDRefined))
-    assert(meanDistance(dstIP, refCP) <= meanDistanceTolerance)
+    val (dstStack, bpp) = DeBayer2.process(bayCP, DeBayer2Config(MosaicOrder.B_G, Demosaicing.DDFAPDRefined))
+    val cp = DeBayer2.stackToColorProcessor(dstStack, bpp)
+    assert(meanDistance(cp, refCP) <= meanDistanceTolerance)
   }
 
   it should "DDFAPDRefined GB" in {
     val bayCP = openByteProcessor("../data/Lighthouse_bayerGB8.png")
-    val dstIP = DeBayer2.process(bayCP, DeBayer2Config(MosaicOrder.G_B, Demosaicing.DDFAPDRefined))
-    assert(meanDistance(dstIP, refCP) <= meanDistanceTolerance)
+    val (dstStack, bpp) = DeBayer2.process(bayCP, DeBayer2Config(MosaicOrder.G_B, Demosaicing.DDFAPDRefined))
+    val cp = DeBayer2.stackToColorProcessor(dstStack, bpp)
+    assert(meanDistance(cp, refCP) <= meanDistanceTolerance)
   }
 
   it should "DDFAPDRefined GR" in {
     val bayCP = openByteProcessor("../data/Lighthouse_bayerGR8.png")
-    val dstIP = DeBayer2.process(bayCP, DeBayer2Config(MosaicOrder.G_R, Demosaicing.DDFAPDRefined))
-    assert(meanDistance(dstIP, refCP) <= meanDistanceTolerance)
+    val (dstStack, bpp) = DeBayer2.process(bayCP, DeBayer2Config(MosaicOrder.G_R, Demosaicing.DDFAPDRefined))
+    val cp = DeBayer2.stackToColorProcessor(dstStack, bpp)
+    assert(meanDistance(cp, refCP) <= meanDistanceTolerance)
   }
 
 
   it should "DDFAPDRefined RG" in {
     val bayCP = openByteProcessor("../data/Lighthouse_bayerRG8.png")
-    val dstIP = DeBayer2.process(bayCP, DeBayer2Config(MosaicOrder.R_G, Demosaicing.DDFAPDRefined))
-    assert(meanDistance(dstIP, refCP) <= meanDistanceTolerance)
+    val (dstStack, bpp) = DeBayer2.process(bayCP, DeBayer2Config(MosaicOrder.R_G, Demosaicing.DDFAPDRefined))
+    val cp = DeBayer2.stackToColorProcessor(dstStack, bpp)
+    assert(meanDistance(cp, refCP) <= meanDistanceTolerance)
+  }
+
+  it should "AdaptiveSmoothHue RG" in {
+    val bayCP = openByteProcessor("../data/Lighthouse_bayerRG8.png")
+    val (dstStack, bpp) = DeBayer2.process(bayCP, DeBayer2Config(MosaicOrder.R_G, Demosaicing.AdaptiveSmoothHue))
+    val cp = DeBayer2.stackToColorProcessor(dstStack, bpp)
+    assert(meanDistance(cp, refCP) <= meanDistanceTolerance * 3)
   }
 }

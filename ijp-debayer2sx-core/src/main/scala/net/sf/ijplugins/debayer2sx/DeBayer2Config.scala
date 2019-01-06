@@ -52,22 +52,23 @@ object DeBayer2Config {
 
   }
 
-  sealed abstract class MosaicOrder(override val entryName: String) extends EnumEntry
+  sealed abstract class MosaicOrder(override val entryName: String, val bayer1ID: Int) extends EnumEntry
 
   /**
     * Order of filters in Bayer image.
+    * For instance B-G means that the first pixel in the first row is `B` the next one is `G`.
     */
   object MosaicOrder extends Enum[MosaicOrder] {
     val values: immutable.IndexedSeq[MosaicOrder] = findValues
     val names: Array[String] = values.map(_.entryName).toArray
 
-    case object B_G extends MosaicOrder("B-G")
+    case object B_G extends MosaicOrder("B-G", 1)
 
-    case object G_B extends MosaicOrder("G-B")
+    case object G_B extends MosaicOrder("G-B", 3)
 
-    case object G_R extends MosaicOrder("G-R")
+    case object G_R extends MosaicOrder("G-R", 2)
 
-    case object R_G extends MosaicOrder("R-G")
+    case object R_G extends MosaicOrder("R-G", 0)
 
   }
 

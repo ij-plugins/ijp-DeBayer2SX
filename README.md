@@ -8,11 +8,10 @@
 Demasaicing (Bayer patter reconstruction) algorithms implemented, all support 8 bit and 16 bit input:
 
 * __DDFPD__ - published in: "Demosaicing with Directional Filtering and a Posteriori Decision", D. Menon, S. Andriani, and G. Calvagno, _IEEE Trans. Image Processing_, vol. 16 no. 1, Jan. 2007. Versions with and without refining are provided.
-* __Copy__ - simple copying of color values to corresponding RGB bands, no reconstruction.
 * __Replication__ - from [Debayer plugin][debayer]
 * __Bilinear__ - from [Debayer plugin][debayer]
 * __Smooth Hue__ - from [Debayer plugin][debayer]
-* __Adaptive Smooth Hue__ - from [Debayer plugin][debayer]
+* __Adaptive Smooth Hue__ - Adaptive Smooth Hue algorithm (Edge detecting) from [Debayer plugin][debayer]
 
 ## Project Structure
 * __ijp-debayer2sx-plugins__ - the front-end ImageJ plugins for end-user.

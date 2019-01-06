@@ -30,7 +30,15 @@ import net.sf.ijplugins.debayer2sx.process.{FR, copyRanges}
 
 object DeBayer2 {
 
-  def process(ip: ImageProcessor, config: DeBayer2Config): ColorProcessor = {
+  /**
+    * Decode Bayer pattern in the input image `ip`.
+    * This is a convenient helper method that give assess to all implemented algorithms.
+    *
+    * @param ip     image in a Bayer pattern, either 8-bit (ByteProcessor) or 16-bit (ShortProcessor).
+    * @param config what algorithm and which filter order to use.
+    * @return stack representing R, G, and B channels and assumed bits-per-pixel used in decoding (8 or 16).
+    */
+  def process(ip: ImageProcessor, config: DeBayer2Config): (ImageStack, Int) = {
 
     val bbp: Int = ip match {
       case _: ByteProcessor => 8
@@ -38,18 +46,44 @@ object DeBayer2 {
       case _ => throw new IllegalArgumentException("Unsupported image processor type: " + ip)
     }
 
-    config.demosaicing match {
+    val stack = config.demosaicing match {
+      case Demosaicing.Replication =>
+        Debayer1.replicate_decode(config.mosaicOrder.bayer1ID, ip)
+      case Demosaicing.Bilinear =>
+        Debayer1.average_decode(config.mosaicOrder.bayer1ID, ip)
+      case Demosaicing.SmoothHue =>
+        Debayer1.smooth_decode(config.mosaicOrder.bayer1ID, ip)
+      case Demosaicing.AdaptiveSmoothHue =>
+        Debayer1.adaptive_decode(config.mosaicOrder.bayer1ID, ip)
       case Demosaicing.DDFAPD =>
-        val bay = ip.convertToFloatProcessor()
-        val stack = debayerDDFAPD(bay, bbp, doRefine = false, config.mosaicOrder)
-        stackToColorProcessor(stack, bbp)
+        debayerDDFAPD(ip.convertToFloatProcessor(), bbp, doRefine = false, config.mosaicOrder)
       case Demosaicing.DDFAPDRefined =>
-        val bay = ip.convertToFloatProcessor()
-        val stack = debayerDDFAPD(bay, bbp, doRefine = true, config.mosaicOrder)
-        stackToColorProcessor(stack, bbp)
+        debayerDDFAPD(ip.convertToFloatProcessor(), bbp, doRefine = true, config.mosaicOrder)
       case x =>
         throw new UnsupportedOperationException("Unsupported demosaicing type: " + x)
     }
+
+    (stack, bbp)
+  }
+
+  /**
+    * Convert stack created during demosaicing (Bayer pattern decoding) to a 8-bit-per-band color image.
+    * The stack contains three bands R, G, and B.
+    *
+    * @param stack input stack.
+    * @param bbp   pits-per-pixel in the Bayer image before decoding.
+    * @return color image
+    */
+  def stackToColorProcessor(stack: ImageStack, bbp: Int): ColorProcessor = {
+    val scale = 256 / math.pow(2, bbp)
+    val cp = new ColorProcessor(stack.getWidth, stack.getHeight)
+    for (i <- 1 to 3) {
+      val fp = stack.getProcessor(i)
+      fp.multiply(scale)
+      cp.setChannel(i, fp.convertToByteProcessor(false))
+    }
+
+    cp
   }
 
   private def debayerDDFAPD(src: FloatProcessor, bbp: Int, doRefine: Boolean, order: MosaicOrder): ImageStack = {
@@ -112,18 +146,6 @@ object DeBayer2 {
         stack.crop(1, 0, 0, w, h, stack.size())
     }
 
-  }
-
-  private def stackToColorProcessor(stack: ImageStack, bbp: Int): ColorProcessor = {
-    val scale = 256 / math.pow(2, bbp)
-    val cp = new ColorProcessor(stack.getWidth, stack.getHeight)
-    for (i <- 1 to 3) {
-      val fp = stack.getProcessor(i)
-      fp.multiply(scale)
-      cp.setChannel(i, fp.convertToByteProcessor(false))
-    }
-
-    cp
   }
 
 

@@ -31,6 +31,7 @@ import net.sf.ijplugins.util.IJPUtils
 
 object DeBayer2Plugin {
   private var config: DeBayer2Config = DeBayer2Config()
+  private var showColour = true
 }
 
 class DeBayer2Plugin extends PlugIn {
@@ -58,39 +59,45 @@ class DeBayer2Plugin extends PlugIn {
     }
 
     // Ask for options
-    showDialog() match {
-      case Some(c) => config = c
-      case None => return
-    }
+    val ok = showDialog()
+    if (!ok) return
 
     // Run DeBayer2
     IJ.showStatus("Debayering...")
 
     val shortTitle = imp.getShortTitle
-    val cp = DeBayer2.process(imp.getProcessor, config)
+    val (stack, bpp) = DeBayer2.process(imp.getProcessor, config)
 
-    new ImagePlus(shortTitle + "-" + Title, cp).show()
+    new ImagePlus(shortTitle + "-" + Title, stack).show()
+
+    if (showColour) {
+      val cp = DeBayer2.stackToColorProcessor(stack, bpp)
+      new ImagePlus(shortTitle + "-RGB-" + Title, cp).show()
+    }
+
   }
 
-  private def showDialog(): Option[DeBayer2Config] = {
+  private def showDialog(): Boolean = {
     // Create dialog
     val gd = new GenericDialog(Title)
     gd.addPanel(IJPUtils.createInfoPanel(Title, Description))
     gd.addChoice("Order of first row:", MosaicOrder.names, config.mosaicOrder.entryName)
     gd.addChoice("Demosaicing type", Demosaicing.names, config.demosaicing.entryName)
+    gd.addCheckbox("Display Colour Image", showColour)
 
     // Show to the user
     gd.showDialog()
     if (gd.wasCanceled()) {
-      return None
+      return false
     }
 
     // Decode values
-    val c = DeBayer2Config(
+    config = DeBayer2Config(
       mosaicOrder = MosaicOrder.withName(gd.getNextChoice),
       demosaicing = Demosaicing.withName(gd.getNextChoice),
     )
+    showColour = gd.getNextBoolean
 
-    Option(c)
+    true
   }
 }
