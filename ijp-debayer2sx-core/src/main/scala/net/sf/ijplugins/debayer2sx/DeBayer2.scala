@@ -78,7 +78,7 @@ object DeBayer2 {
     val scale = 256 / math.pow(2, bbp)
     val cp = new ColorProcessor(stack.getWidth, stack.getHeight)
     for (i <- 1 to 3) {
-      val fp = stack.getProcessor(i)
+      val fp = stack.getProcessor(i).duplicate()
       fp.multiply(scale)
       cp.setChannel(i, fp.convertToByteProcessor(false))
     }
