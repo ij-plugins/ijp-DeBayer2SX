@@ -3,7 +3,7 @@ import sbt.Keys.version
 
 name := "ijp-debayer2sx"
 
-val _version = "0.1-SNAPSHOT"
+val _version = "0.1.1-SNAPSHOT"
 
 lazy val _scalaVersion = "2.12.8"
 
