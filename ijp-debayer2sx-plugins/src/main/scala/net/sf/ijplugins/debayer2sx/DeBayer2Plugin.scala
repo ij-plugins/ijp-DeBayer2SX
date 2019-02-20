@@ -25,13 +25,13 @@ package net.sf.ijplugins.debayer2sx
 import ij.gui.GenericDialog
 import ij.plugin.PlugIn
 import ij.plugin.filter.PlugInFilter
-import ij.{IJ, ImagePlus}
+import ij.{CompositeImage, IJ, ImagePlus}
 import net.sf.ijplugins.debayer2sx.DeBayer2Config.{Demosaicing, MosaicOrder}
 import net.sf.ijplugins.util.IJPUtils
 
 object DeBayer2Plugin {
   private var config: DeBayer2Config = DeBayer2Config()
-  private var showColour = true
+  private var showColour = false
 }
 
 class DeBayer2Plugin extends PlugIn {
@@ -68,7 +68,8 @@ class DeBayer2Plugin extends PlugIn {
     val shortTitle = imp.getShortTitle
     val (stack, bpp) = DeBayer2.process(imp.getProcessor, config)
 
-    new ImagePlus(shortTitle + "-" + Title, stack).show()
+    val dstImp = new ImagePlus(shortTitle + "-" + Title, stack)
+    new CompositeImage(dstImp, CompositeImage.COMPOSITE).show()
 
     if (showColour) {
       val cp = DeBayer2.stackToColorProcessor(stack, bpp)
