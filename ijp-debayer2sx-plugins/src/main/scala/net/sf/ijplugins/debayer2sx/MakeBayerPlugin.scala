@@ -25,7 +25,7 @@ package net.sf.ijplugins.debayer2sx
 import ij.gui.GenericDialog
 import ij.plugin.PlugIn
 import ij.process.ColorProcessor
-import ij.{IJ, ImagePlus}
+import ij.{CompositeImage, IJ, ImagePlus, ImageStack}
 import net.sf.ijplugins.debayer2sx.DeBayer2Config.MosaicOrder
 import net.sf.ijplugins.util.IJPUtils
 
@@ -37,10 +37,14 @@ class MakeBayerPlugin extends PlugIn {
 
   import MakeBayerPlugin._
 
-  private val Title = "Make_Bayer"
+  private val Title = "Make Bayer"
   private val Description = "Convert color image to Bayer pattern image."
 
   override def run(arg: String): Unit = {
+
+    def isColorComposite(imp: ImagePlus): Boolean = {
+      imp.isComposite && imp.getNChannels == 3 && imp.getStackSize == 3 && imp.isInstanceOf[CompositeImage]
+    }
 
     // We need an input image
     val imp = IJ.getImage
@@ -48,11 +52,9 @@ class MakeBayerPlugin extends PlugIn {
       return
 
     // Check for supported types
-    imp.getType match {
-      case ImagePlus.COLOR_RGB =>
-      case _ =>
-        IJ.error(Title, "Unsupported image type. Expecting RGB color image.")
-        return
+    if (!(imp.getType == ImagePlus.COLOR_RGB || isColorComposite(imp))) {
+      IJ.error(Title, "Unsupported image type. Expecting RGB color image or 3 channel composite image.")
+      return
     }
 
     // Ask for options
@@ -65,10 +67,18 @@ class MakeBayerPlugin extends PlugIn {
 
     mosaicOrder = MosaicOrder.withName(gd.getNextChoice)
 
-    val cp = imp.getProcessor.asInstanceOf[ColorProcessor]
-    val dst = MakeBayer.process(cp, mosaicOrder)
+    val srcStack: ImageStack =
+      if (imp.getType == ImagePlus.COLOR_RGB) {
+        val cp = imp.getProcessor.asInstanceOf[ColorProcessor]
+        MakeBayer.toStack(cp)
+      } else if (isColorComposite(imp)) {
+        imp.getStack
+      } else {
+        IJ.error(Title, "Unsupported image type. Expecting RGB color image or 3 channel composite image.")
+        return
+      }
 
-    new ImagePlus(imp.getShortTitle + "_bayer_" + mosaicOrder, dst).show()
-
+    val dstStack = MakeBayer.process(srcStack, mosaicOrder)
+    new ImagePlus(imp.getShortTitle + "_bayer_" + mosaicOrder, dstStack).show()
   }
 }

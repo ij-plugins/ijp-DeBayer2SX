@@ -22,11 +22,38 @@
 
 package net.sf.ijplugins.debayer2sx
 
-import ij.process.{ByteProcessor, ColorProcessor, FloatProcessor}
+import ij.ImageStack
+import ij.process.{ByteProcessor, ColorProcessor, FloatProcessor, ImageProcessor}
 import net.sf.ijplugins.debayer2sx.DeBayer2Config.MosaicOrder
 import net.sf.ijplugins.debayer2sx.process.copyRanges
 
+/**
+  * Create Bayer images from color images. This is mostly useful for testing and demos.
+  */
 object MakeBayer {
+
+  /**
+    * Convert RGB color image to stack of gray level images.
+    *
+    * @param cp color image
+    * @return stack of 3 8-bit images
+    */
+  def toStack(cp: ColorProcessor): ImageStack = {
+    val w: Int = cp.getWidth
+    val h: Int = cp.getHeight
+    val size: Int = w * h
+    val r = new Array[Byte](size)
+    val g = new Array[Byte](size)
+    val b = new Array[Byte](size)
+    cp.getRGB(r, g, b)
+    val stack = new ImageStack(w, h)
+    stack.addSlice("Red", r)
+    stack.addSlice("Green", g)
+    stack.addSlice("Blue", b)
+    stack.setColorModel(cp.getDefaultColorModel)
+    stack
+  }
+
 
   /**
     * Encode color image in a Bayer pattern.
@@ -36,12 +63,27 @@ object MakeBayer {
     * @return Bayer pattern coded image.
     */
   def process(cp: ColorProcessor, mosaicOrder: MosaicOrder): ByteProcessor = {
-    val fpR = cp.getChannel(1, null).convertToFloatProcessor()
-    val fpG = cp.getChannel(2, null).convertToFloatProcessor()
-    val fpB = cp.getChannel(3, null).convertToFloatProcessor()
+    process(toStack(cp), mosaicOrder).asInstanceOf[ByteProcessor]
+  }
 
-    val w = cp.getWidth
-    val h = cp.getHeight
+  /**
+    * Encode color image in a Bayer pattern.
+    *
+    * @param stack       input color image represented as a stack of 3 gray level images.
+    * @param mosaicOrder filter order
+    * @return Bayer pattern coded image of the same bit depth as slices in the input stack.
+    */
+  def process(stack: ImageStack, mosaicOrder: MosaicOrder): ImageProcessor = {
+
+    require(stack.size() == 3)
+    require(stack.getBitDepth == 8 || stack.getBitDepth == 16 || stack.getBitDepth == 32)
+
+    val fpR = stack.getProcessor(1).convertToFloatProcessor()
+    val fpG = stack.getProcessor(2).convertToFloatProcessor()
+    val fpB = stack.getProcessor(3).convertToFloatProcessor()
+
+    val w = stack.getWidth
+    val h = stack.getHeight
     val fpBayer = new FloatProcessor(w, h)
 
     // ip00 ip10
@@ -77,7 +119,11 @@ object MakeBayer {
     // ip11
     copyRanges(fpBayer, Range(1, w, 2), Range(1, h, 2), ip11, Range(1, w, 2), Range(1, h, 2))
 
-    fpBayer.convertToByteProcessor(false)
+    stack.getBitDepth match {
+      case 8 => fpBayer.convertToByte(false)
+      case 16 => fpBayer.convertToShort(false)
+      case 32 => fpBayer.convertToFloat()
+      case bitDepth => throw new IllegalArgumentException("Unsupported bit depth: " + bitDepth)
+    }
   }
-
 }
