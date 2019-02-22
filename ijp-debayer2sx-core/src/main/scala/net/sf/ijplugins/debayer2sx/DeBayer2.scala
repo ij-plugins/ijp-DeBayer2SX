@@ -63,6 +63,10 @@ object DeBayer2 {
         throw new UnsupportedOperationException("Unsupported demosaicing type: " + x)
     }
 
+    stack.setSliceLabel("Red", 1)
+    stack.setSliceLabel("Green", 2)
+    stack.setSliceLabel("Blue", 3)
+
     (stack, bbp)
   }
 
