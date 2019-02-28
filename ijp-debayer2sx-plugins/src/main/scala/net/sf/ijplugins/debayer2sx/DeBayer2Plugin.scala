@@ -31,7 +31,6 @@ import net.sf.ijplugins.util.IJPUtils
 
 object DeBayer2Plugin {
   private var config: DeBayer2Config = DeBayer2Config()
-  private var showColour = false
 }
 
 class DeBayer2Plugin extends PlugIn {
@@ -58,6 +57,12 @@ class DeBayer2Plugin extends PlugIn {
         return
     }
 
+    // Check for stacks
+    if (imp.getStackSize != 1) {
+      IJ.error(Title, "Processing of stacks not supported.")
+      return
+    }
+
     // Ask for options
     val ok = showDialog()
     if (!ok) return
@@ -68,14 +73,25 @@ class DeBayer2Plugin extends PlugIn {
     val shortTitle = imp.getShortTitle
     val (stack, bpp) = DeBayer2.process(imp.getProcessor, config)
 
-    val dstImp = new ImagePlus(shortTitle + "-" + Title, stack)
-    new CompositeImage(dstImp, CompositeImage.COMPOSITE).show()
-
-    if (showColour) {
-      val cp = DeBayer2.stackToColorProcessor(stack, bpp)
-      new ImagePlus(shortTitle + "-RGB-" + Title, cp).show()
+    val dstTitle = shortTitle + "-" + Title
+    val dstImp: ImagePlus = imp.getType match {
+      case ImagePlus.GRAY8 =>
+        val cp = DeBayer2.stackToColorProcessor(stack, bpp)
+        new ImagePlus(dstTitle, cp)
+      case ImagePlus.GRAY16 =>
+        val ss = if (stack.getBitDepth == 16) {
+          stack
+        } else {
+          DeBayer2.stackToShortStack(stack, bpp, bpp)
+        }
+        val imp1 = new ImagePlus(dstTitle, ss)
+        new CompositeImage(imp1, CompositeImage.COMPOSITE)
+      case _ =>
+        IJ.error(Title, "Unsupported image type. Expecting 8-bit or 16-bit gray level.")
+        return
     }
 
+    dstImp.show()
   }
 
   private def showDialog(): Boolean = {
@@ -84,7 +100,6 @@ class DeBayer2Plugin extends PlugIn {
     gd.addPanel(IJPUtils.createInfoPanel(Title, Description))
     gd.addChoice("Order of first row:", MosaicOrder.names, config.mosaicOrder.entryName)
     gd.addChoice("Demosaicing type", Demosaicing.names, config.demosaicing.entryName)
-    gd.addCheckbox("Display Colour Image", showColour)
 
     // Show to the user
     gd.showDialog()
@@ -97,7 +112,6 @@ class DeBayer2Plugin extends PlugIn {
       mosaicOrder = MosaicOrder.withName(gd.getNextChoice),
       demosaicing = Demosaicing.withName(gd.getNextChoice),
     )
-    showColour = gd.getNextBoolean
 
     true
   }

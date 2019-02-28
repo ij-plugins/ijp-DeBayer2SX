@@ -72,14 +72,19 @@ object DeBayer2 {
 
   /**
     * Convert stack created during demosaicing (Bayer pattern decoding) to a 8-bit-per-band color image.
-    * The stack contains three bands R, G, and B.
+    * The stack contains three bands R, G, and B as FloatProcessors.
     *
-    * @param stack input stack.
-    * @param bbp   pits-per-pixel in the Bayer image before decoding.
+    * @param stack  input stack (FloatProcessors)
+    * @param srcBBP bits-per-pixel in the Bayer image before decoding.
+    * @param dstBPP desired bits-per-pixel in the Bayer image after decoding.
     * @return color image
     */
-  def stackToColorProcessor(stack: ImageStack, bbp: Int): ColorProcessor = {
-    val scale = 256 / math.pow(2, bbp)
+  def stackToColorProcessor(stack: ImageStack, srcBBP: Int, dstBPP: Int = 8): ColorProcessor = {
+    assert(stack.getBitDepth == 32, "Expecting FloatProcessor stack")
+    assert(dstBPP > 0, "valueRange must be larger than 0")
+    assert(dstBPP <= 8, "valueRange must be less or equal 8")
+
+    val scale = math.pow(2, dstBPP) / math.pow(2, srcBBP)
     val cp = new ColorProcessor(stack.getWidth, stack.getHeight)
     for (i <- 1 to 3) {
       val fp = stack.getProcessor(i).duplicate()
@@ -89,6 +94,35 @@ object DeBayer2 {
 
     cp
   }
+
+  /**
+    * Convert stack created during demosaicing (Bayer pattern decoding) to a 8-bit-per-band color image.
+    * The stack contains three bands R, G, and B as FloatProcessors.
+    *
+    * @param stack  input stack (FloatProcessors).
+    * @param srcBBP bits-per-pixel in the Bayer image before decoding.
+    * @param dstBPP desired bits-per-pixel in the Bayer image after decoding.
+    * @return color image
+    */
+  def stackToShortStack(stack: ImageStack, srcBBP: Int, dstBPP: Int = 16): ImageStack = {
+    assert(stack.getBitDepth == 32, "Expecting FloatProcessor stack")
+    assert(dstBPP > 0, "valueRange must be larger than 0")
+    assert(dstBPP <= 16, "valueRange must be less or equal 16")
+
+    val dst = new ImageStack(stack.getWidth, stack.getHeight)
+    val dstRange = math.pow(2, dstBPP)
+    val scale = math.pow(2, dstBPP) / math.pow(2, srcBBP)
+    for ((label, i) <- Array("Red", "Green", "Blue").zipWithIndex) {
+      val fp = stack.getProcessor(i + 1).duplicate()
+      fp.multiply(scale)
+      val ip = fp.convertToShortProcessor(false)
+      ip.setMinAndMax(0, dstRange)
+      dst.addSlice(label, fp.convertToShortProcessor(false))
+    }
+
+    dst
+  }
+
 
   private def debayerDDFAPD(src: FloatProcessor, bbp: Int, doRefine: Boolean, order: MosaicOrder): ImageStack = {
 
