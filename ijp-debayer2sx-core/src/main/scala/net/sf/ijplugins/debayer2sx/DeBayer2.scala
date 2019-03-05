@@ -72,17 +72,16 @@ object DeBayer2 {
 
   /**
     * Convert stack created during demosaicing (Bayer pattern decoding) to a 8-bit-per-band color image.
-    * The stack contains three bands R, G, and B as FloatProcessors.
+    * The stack contains three bands R, G, and B.
     *
-    * @param stack  input stack (FloatProcessors)
+    * @param stack  input stack
     * @param srcBBP bits-per-pixel in the Bayer image before decoding.
     * @param dstBPP desired bits-per-pixel in the Bayer image after decoding.
     * @return color image
     */
   def stackToColorProcessor(stack: ImageStack, srcBBP: Int, dstBPP: Int = 8): ColorProcessor = {
-    assert(stack.getBitDepth == 32, "Expecting FloatProcessor stack")
-    assert(dstBPP > 0, "valueRange must be larger than 0")
-    assert(dstBPP <= 8, "valueRange must be less or equal 8")
+    require(dstBPP > 0, "valueRange must be larger than 0")
+    require(dstBPP <= 8, "valueRange must be less or equal 8")
 
     val scale = math.pow(2, dstBPP) / math.pow(2, srcBBP)
     val cp = new ColorProcessor(stack.getWidth, stack.getHeight)
@@ -97,17 +96,16 @@ object DeBayer2 {
 
   /**
     * Convert stack created during demosaicing (Bayer pattern decoding) to a 8-bit-per-band color image.
-    * The stack contains three bands R, G, and B as FloatProcessors.
+    * The stack contains three bands R, G, and B.
     *
-    * @param stack  input stack (FloatProcessors).
+    * @param stack  input stack.
     * @param srcBBP bits-per-pixel in the Bayer image before decoding.
     * @param dstBPP desired bits-per-pixel in the Bayer image after decoding.
     * @return color image
     */
   def stackToShortStack(stack: ImageStack, srcBBP: Int, dstBPP: Int = 16): ImageStack = {
-    assert(stack.getBitDepth == 32, "Expecting FloatProcessor stack")
-    assert(dstBPP > 0, "valueRange must be larger than 0")
-    assert(dstBPP <= 16, "valueRange must be less or equal 16")
+    require(dstBPP > 0, "valueRange must be larger than 0")
+    require(dstBPP <= 16, "valueRange must be less or equal 16")
 
     val dst = new ImageStack(stack.getWidth, stack.getHeight)
     val dstRange = math.pow(2, dstBPP)
