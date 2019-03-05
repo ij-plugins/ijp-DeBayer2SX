@@ -39,6 +39,7 @@ class DeBayer2Plugin extends PlugIn {
 
   private val Title = "DeBayer2"
   private val Description = "Convert a bayer pattern image to a color image."
+  private val HelpURL = "https://github.com/ij-plugins/ijp-DeBayer2SX"
 
   protected def Flags: Int = PlugInFilter.DOES_8G + PlugInFilter.DOES_16
 
@@ -100,6 +101,7 @@ class DeBayer2Plugin extends PlugIn {
     gd.addPanel(IJPUtils.createInfoPanel(Title, Description))
     gd.addChoice("Order of first row:", MosaicOrder.names, config.mosaicOrder.entryName)
     gd.addChoice("Demosaicing type", Demosaicing.names, config.demosaicing.entryName)
+    gd.addHelp(HelpURL)
 
     // Show to the user
     gd.showDialog()

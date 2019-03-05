@@ -39,6 +39,7 @@ class MakeBayerPlugin extends PlugIn {
 
   private val Title = "Make Bayer"
   private val Description = "Convert color image to Bayer pattern image."
+  private val HelpURL = "https://github.com/ij-plugins/ijp-DeBayer2SX"
 
   override def run(arg: String): Unit = {
 
@@ -61,6 +62,8 @@ class MakeBayerPlugin extends PlugIn {
     val gd = new GenericDialog(Title)
     gd.addPanel(IJPUtils.createInfoPanel(Title, Description))
     gd.addChoice("Order of first row:", MosaicOrder.names, mosaicOrder.entryName)
+    gd.addHelp(HelpURL)
+
 
     gd.showDialog()
     if (gd.wasCanceled()) return
