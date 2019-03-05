@@ -87,7 +87,7 @@ object DeBayer2 {
     val cp = new ColorProcessor(stack.getWidth, stack.getHeight)
     for (i <- 1 to 3) {
       val fp = stack.getProcessor(i).duplicate()
-      fp.multiply(scale)
+      if (srcBBP != dstBPP) fp.multiply(scale)
       cp.setChannel(i, fp.convertToByteProcessor(false))
     }
 
@@ -112,10 +112,10 @@ object DeBayer2 {
     val scale = math.pow(2, dstBPP) / math.pow(2, srcBBP)
     for ((label, i) <- Array("Red", "Green", "Blue").zipWithIndex) {
       val fp = stack.getProcessor(i + 1).duplicate()
-      fp.multiply(scale)
+      if (srcBBP != dstBPP) fp.multiply(scale)
       val ip = fp.convertToShortProcessor(false)
       ip.setMinAndMax(0, dstRange)
-      dst.addSlice(label, fp.convertToShortProcessor(false))
+      dst.addSlice(label, ip)
     }
 
     dst
