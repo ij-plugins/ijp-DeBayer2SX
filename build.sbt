@@ -26,8 +26,8 @@ val commonSettings = Seq(
   // Some dependencies like `javacpp` are packaged with maven-plugin packaging
   classpathTypes += "maven-plugin",
   libraryDependencies ++= Seq(
-    "net.imagej"     % "ij"        % "1.52h",
-    "org.scalatest" %% "scalatest" % "3.0.5" % "test",
+    "net.imagej"     % "ij"        % "1.52k",
+    "org.scalatest" %% "scalatest" % "3.0.6" % "test",
   ),
   resolvers ++= Seq(
     Resolver.sonatypeRepo("snapshots"),
