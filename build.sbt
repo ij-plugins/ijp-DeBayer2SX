@@ -5,7 +5,7 @@ import sbt.Keys.{licenses, startYear, version}
 
 name := "ijp-debayer2sx"
 
-val _version = "1.0.0"
+val _version = "1.0.1-SNAPSHOT"
 
 lazy val _scalaVersion = "2.12.8"
 
