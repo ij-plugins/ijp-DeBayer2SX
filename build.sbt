@@ -1,4 +1,6 @@
-import sbt.Keys.version
+import java.net.URL
+
+import sbt.Keys.{licenses, startYear, version}
 // @formatter:off
 
 name := "ijp-debayer2sx"
@@ -11,6 +13,9 @@ scalaVersion := _scalaVersion
 publishArtifact := false
 
 val commonSettings = Seq(
+  homepage      := Some(new URL("https://github.com/ij-plugins/ijp-DeBayer2SX")),
+  startYear     := Some(2018),
+  licenses      := Seq(("LGPL-2.1", new URL("http://opensource.org/licenses/LGPL-2.1"))),
   organization  := "net.sf.ij-plugins",
   version       := _version,
   scalaVersion  := _scalaVersion,
@@ -40,7 +45,19 @@ val commonSettings = Seq(
   fork := true,
   //
   manifestSetting,
-  publishSetting
+  publishSetting,
+  pomExtra :=
+  <scm>
+    <url>https://github.com/ij-plugins/ijp-DeBayer2SX</url>
+    <connection>scm:https://github.com/ij-plugins/ijp-DeBayer2SX.git</connection>
+  </scm>
+    <developers>
+      <developer>
+        <id>jpsacha</id>
+        <name>Jarek Sacha</name>
+        <url>https://github.com/jpsacha</url>
+      </developer>
+    </developers>
 )
 
 // Resolvers
@@ -100,16 +117,3 @@ lazy val manifestSetting = packageOptions += {
     "Implementation-Vendor"    -> organization.value
   )
 }
-
-pomExtra :=
-  <scm>
-    <url>https://github.com/ij-plugins/ijp-DeBayer2SX</url>
-    <connection>scm:https://github.com/ij-plugins/ijp-DeBayer2SX.git</connection>
-  </scm>
-    <developers>
-      <developer>
-        <id>jpsacha</id>
-        <name>Jarek Sacha</name>
-        <url>https://github.com/jpsacha</url>
-      </developer>
-    </developers>
