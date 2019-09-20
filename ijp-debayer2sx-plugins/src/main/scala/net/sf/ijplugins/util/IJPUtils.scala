@@ -78,7 +78,7 @@ object IJPUtils {
     val bodyRule = "body { font-family: " + font.getFamily + "; " + "font-size: " + font.getSize + "pt; }"
     htmlDocument.getStyleSheet.addRule(bodyRule)
     pane.addHyperlinkListener(new HyperlinkListener() {
-      def hyperlinkUpdate(e: HyperlinkEvent) {
+      def hyperlinkUpdate(e: HyperlinkEvent): Unit = {
         if (e.getEventType == ACTIVATED) {
           try {
             Desktop.getDesktop.browse(e.getURL.toURI)
