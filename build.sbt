@@ -5,12 +5,14 @@ import sbt.Keys.{licenses, startYear, version}
 
 name := "ijp-debayer2sx"
 
-val _version = "1.0.0"
+val _version = "1.0.1-SNAPSHOT"
 
-lazy val _scalaVersion = "2.12.8"
+lazy val _scalaVersions = Seq("2.13.1", "2.12.10")
+lazy val _scalaVersion = _scalaVersions.head
 
 scalaVersion := _scalaVersion
 publishArtifact := false
+skip in publish := true
 
 val commonSettings = Seq(
   homepage      := Some(new URL("https://github.com/ij-plugins/ijp-DeBayer2SX")),
@@ -19,24 +21,27 @@ val commonSettings = Seq(
   organization  := "net.sf.ij-plugins",
   version       := _version,
   scalaVersion  := _scalaVersion,
+  crossScalaVersions := _scalaVersions,
   scalacOptions ++= Seq(
     "-unchecked", 
     "-deprecation", 
     "-Xlint", 
     "-explaintypes", 
-    "-target:jvm-1.8", 
+//    "-target:jvm-1.8",
 //    "-opt:l:method",
   ),
-  javacOptions  ++= Seq("-deprecation", "-Xlint", "-target", "1.8", "-source", "1.8"),
+  javacOptions  ++= Seq("-deprecation", "-Xlint",
+//    "-target", "1.8", "-source", "1.8"
+  ),
   // Some dependencies like `javacpp` are packaged with maven-plugin packaging
   classpathTypes += "maven-plugin",
   libraryDependencies ++= Seq(
-    "net.imagej"     % "ij"        % "1.52k",
-    "org.scalatest" %% "scalatest" % "3.0.6" % "test",
+    "net.imagej"     % "ij"        % "1.52p",
+    "org.scalatest" %% "scalatest" % "3.0.8" % "test",
   ),
   resolvers ++= Seq(
     Resolver.sonatypeRepo("snapshots"),
-    "ImageJ Releases" at "http://maven.imagej.net/content/repositories/releases/",
+//    "ImageJ Releases" at "http://maven.imagej.net/content/repositories/releases/",
     // Use local maven repo for local javacv builds
     Resolver.mavenLocal
   ),
@@ -82,22 +87,23 @@ lazy val ijp_debayer2sx_core = project.in(file("ijp-debayer2sx-core"))
 lazy val ijp_debayer2sx_plugins = project.in(file("ijp-debayer2sx-plugins"))
   .settings(commonSettings,
     name        := "ijp-debayer2sx-plugins",
-    description := "IJP DeBayer2SX ImageJ Plugins",
-    publishArtifact := false)
+    description := "IJP DeBayer2SX ImageJ Plugins")
   .dependsOn(ijp_debayer2sx_core)
 
 lazy val ijp_debayer2sx_demos = project.in(file("ijp-debayer2sx-demos"))
   .settings(commonSettings,
     name        := "ijp-debayer2sx-demos",
     description := "IJP DeBayer2SX Demos",
-    publishArtifact := false)
+    publishArtifact := false,
+    skip in publish := true)
   .dependsOn(ijp_debayer2sx_core)
 
 lazy val ijp_debayer2sx_experimental = project.in(file("ijp-debayer2sx-experimental"))
   .settings(commonSettings,
     name        := "ijp-debayer2sx-experimental",
     description := "Experimental Features",
-    publishArtifact := false)
+    publishArtifact := false,
+    skip in publish := true)
   .dependsOn(ijp_debayer2sx_core)
 
 // Set the prompt (for this build) to include the project id.

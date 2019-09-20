@@ -1,8 +1,8 @@
 # ijp-DeBayer2SX
 [Bayer-pattern][bayer-filter] image to color image converters.
 
-[![Build Status](https://travis-ci.org/ij-plugins/ijp-DeBayer2SX.svg?branch=master)](https://travis-ci.org/ij-plugins/ijp-DeBayer2SX) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.sf.ij-plugins/ijp-DeBayer2SX_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.sf.ij-plugins/ijp-DeBayer2SX_2.12)
-                                                                                                                                       [![Scaladoc](http://javadoc-badge.appspot.com/net.sf.ij-plugins/ijp-DeBayer2SX_2.12.svg?label=scaladoc)](http://javadoc-badge.appspot.com/net.sf.ij-plugins/ijp-DeBayer2SX_2.12)
+[![Build Status](https://travis-ci.org/ij-plugins/ijp-DeBayer2SX.svg?branch=master)](https://travis-ci.org/ij-plugins/ijp-DeBayer2SX) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.sf.ij-plugins/ijp-debayer2sx-core_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.sf.ij-plugins/ijp-debayer2sx-core_2.12)
+                                                                                                                                       [![Scaladoc](http://javadoc-badge.appspot.com/net.sf.ij-plugins/ijp-debayer2sx-core_2.12.svg?label=scaladoc)](http://javadoc-badge.appspot.com/net.sf.ij-plugins/ijp-debayer2sx-core_2.12)
 
 
 Demasaicing (Bayer patter reconstruction) algorithms implemented, all support 8 bit and 16 bit input:
@@ -23,6 +23,14 @@ Demasaicing (Bayer patter reconstruction) algorithms implemented, all support 8 
 Plugins install by default under "plugins" > "IJ-Plugins"
 * __DeBayer2__ - convert Bayer-pattern image to color image using various algorithms.
 * __Make Bayer__ - convert color image to a Bayer-pattern image.
+
+
+## Using as library
+`ijp-DeBayer2SX` can be used as a stand-alone library, add following dependency to your SBT:
+
+```scala
+"net.sf.ij-plugins" %% "ijp-debayer2sx-core" % _version_
+```
 
 
 ## Developer Notes
