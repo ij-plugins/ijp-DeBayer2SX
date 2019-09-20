@@ -6,7 +6,7 @@ import xerial.sbt.Sonatype.GitHubHosting
 
 name := "ijp-debayer2sx"
 
-lazy val _version = "1.0.1"
+lazy val _version = "1.0.2-SNAPSHOT"
 lazy val _scalaVersions = Seq("2.13.1", "2.12.10")
 lazy val _scalaVersion  = _scalaVersions.head
 
