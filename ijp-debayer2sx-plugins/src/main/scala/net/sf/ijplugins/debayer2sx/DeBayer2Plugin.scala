@@ -112,7 +112,7 @@ class DeBayer2Plugin extends PlugIn {
     // Decode values
     config = DeBayer2Config(
       mosaicOrder = MosaicOrder.withName(gd.getNextChoice),
-      demosaicing = Demosaicing.withName(gd.getNextChoice),
+      demosaicing = Demosaicing.withName(gd.getNextChoice)
     )
 
     true
