@@ -1,14 +1,14 @@
 import java.net.URL
 
-import sbt.Keys.{licenses, startYear, version}
 import xerial.sbt.Sonatype.GitHubHosting
+
 // @formatter:off
 
 name := "ijp-debayer2sx"
 
-lazy val _version = "1.0.2-SNAPSHOT"
-lazy val _scalaVersions = Seq("2.13.1", "2.12.10")
-lazy val _scalaVersion  = _scalaVersions.head
+val _version = "1.0.2-SNAPSHOT"
+val _scalaVersions = Seq("2.13.1", "2.12.10")
+val _scalaVersion  = _scalaVersions.head
 
 version         := _version
 scalaVersion    := _scalaVersion
@@ -17,39 +17,49 @@ skip in publish := true
 sonatypeProfileName := "net.sf.ij-plugins"
 
 val commonSettings = Seq(
-  homepage      := Some(new URL("https://github.com/ij-plugins/ijp-DeBayer2SX")),
-  startYear     := Some(2018),
-  licenses      := Seq(("LGPL-2.1", new URL("http://opensource.org/licenses/LGPL-2.1"))),
-  organization  := "net.sf.ij-plugins",
-  version       := _version,
-  scalaVersion  := _scalaVersion,
+  version      := _version,
+  organization := "net.sf.ij-plugins",
+  homepage     := Some(new URL("https://github.com/ij-plugins/ijp-color")),
+  startYear    := Some(2002),
+  licenses     := Seq(("LGPL-2.1", new URL("http://opensource.org/licenses/LGPL-2.1"))),
+  //
   crossScalaVersions := _scalaVersions,
+  scalaVersion       := _scalaVersion,
+  //
   scalacOptions ++= Seq(
+    "-encoding", "UTF-8",
     "-unchecked", 
     "-deprecation", 
     "-Xlint", 
+    "-feature",
     "-explaintypes", 
-//    "-target:jvm-1.8",
-//    "-opt:l:method",
   ),
-  javacOptions  ++= Seq("-deprecation", "-Xlint",
-//    "-target", "1.8", "-source", "1.8"
+  scalacOptions in(Compile, doc) ++= Opts.doc.title("IJP Debayer2SX API"),
+  scalacOptions in(Compile, doc) ++= Opts.doc.version(_version),
+  scalacOptions in(Compile, doc) ++= Seq(
+    "-doc-footer", s"IJP Debayer2SX API v.${_version}",
+    "-doc-root-content", baseDirectory.value + "/src/main/scala/root-doc.creole"
   ),
-  // Some dependencies like `javacpp` are packaged with maven-plugin packaging
-  classpathTypes += "maven-plugin",
+  scalacOptions in(Compile, doc) ++= (
+    Option(System.getenv("GRAPHVIZ_DOT_PATH")) match {
+      case Some(path) => Seq("-diagrams", "-diagrams-dot-path", path, "-diagrams-debug")
+      case None => Seq.empty[String]
+    }),
+  javacOptions  ++= Seq("-deprecation", "-Xlint"),
+  //
   libraryDependencies ++= Seq(
     "net.imagej"     % "ij"        % "1.52p",
     "org.scalatest" %% "scalatest" % "3.0.8" % "test",
   ),
-  resolvers ++= Seq(
-    Resolver.sonatypeRepo("snapshots"),
-//    "ImageJ Releases" at "http://maven.imagej.net/content/repositories/releases/",
-    // Use local maven repo for local javacv builds
-    Resolver.mavenLocal
-  ),
+  resolvers += Resolver.sonatypeRepo("snapshots"),
+  //
   autoCompilerPlugins := true,
-  // fork a new JVM for 'run' and 'test:run'
+  // Fork a new JVM for 'run' and 'test:run'
   fork := true,
+  // Add a JVM option to use when forking a JVM for 'run'
+  javaOptions += "-Xmx1G",
+  // Instruct `clean` to delete created plugins subdirectory created by `ijRun`/`ijPrepareRun`.
+  cleanFiles += ijPluginsDir.value,
   //
   manifestSetting,
   // Setup publishing
@@ -57,19 +67,25 @@ val commonSettings = Seq(
   sonatypeProfileName := "net.sf.ij-plugins",
   sonatypeProjectHosting := Some(GitHubHosting("ij-plugins", "ijp-debayer2sx", "jpsacha@gmail.com")),
   publishTo := sonatypePublishTo.value,
+  developers := List(
+    Developer(id="jpsacha", name="Jarek Sacha", email="jpsacha@gmail.com", url=url("https://github.com/jpsacha"))
+  )
 )
 
 lazy val ijp_debayer2sx_core = project.in(file("ijp-debayer2sx-core"))
-  .settings(commonSettings,
+  .settings(
     name        := "ijp-debayer2sx-core",
     description := "IJP DeBayer2SX Core",
+    commonSettings,
     libraryDependencies += "com.beachape" %% "enumeratum" % "1.5.13",
   )
 
 lazy val ijp_debayer2sx_plugins = project.in(file("ijp-debayer2sx-plugins"))
-  .settings(commonSettings,
+  .settings(
     name        := "ijp-debayer2sx-plugins",
-    description := "IJP DeBayer2SX ImageJ Plugins")
+    description := "IJP DeBayer2SX ImageJ Plugins",
+    commonSettings,
+  )
   .dependsOn(ijp_debayer2sx_core)
 
 lazy val ijp_debayer2sx_demos = project.in(file("ijp-debayer2sx-demos"))
@@ -88,9 +104,6 @@ lazy val ijp_debayer2sx_experimental = project.in(file("ijp-debayer2sx-experimen
     skip in publish := true)
   .dependsOn(ijp_debayer2sx_core)
 
-// Set the prompt (for this build) to include the project id.
-shellPrompt in ThisBuild := { state => "sbt:" + Project.extract(state).currentRef.project + "> " }
-
 lazy val manifestSetting = packageOptions += {
   Package.ManifestAttributes(
     "Created-By" -> "Simple Build Tool",
@@ -105,3 +118,14 @@ lazy val manifestSetting = packageOptions += {
     "Implementation-Vendor"    -> organization.value
   )
 }
+
+// Set the prompt (for this build) to include the project id.
+shellPrompt in ThisBuild := { state => "sbt:" + Project.extract(state).currentRef.project + "> " }
+
+// Enable and customize `sbt-imagej` plugin
+enablePlugins(SbtImageJ)
+ijRuntimeSubDir         := "sandbox"
+ijPluginsSubDir         := "ij-plugins"
+ijCleanBeforePrepareRun := true
+// Instruct `clean` to delete created plugins subdirectory created by `ijRun`/`ijPrepareRun`.
+cleanFiles += ijPluginsDir.value
