@@ -6,8 +6,8 @@ import xerial.sbt.Sonatype.GitHubHosting
 
 name := "ijp-debayer2sx"
 
-val _version = "1.0.2-SNAPSHOT"
-val _scalaVersions = Seq("2.13.1", "2.12.10")
+val _version = "1.1.0-SNAPSHOT"
+val _scalaVersions = Seq("2.13.2", "2.12.11")
 val _scalaVersion  = _scalaVersions.head
 
 version         := _version
@@ -48,8 +48,8 @@ val commonSettings = Seq(
   javacOptions  ++= Seq("-deprecation", "-Xlint"),
   //
   libraryDependencies ++= Seq(
-    "net.imagej"     % "ij"        % "1.52p",
-    "org.scalatest" %% "scalatest" % "3.0.8" % "test",
+    "net.imagej"     % "ij"        % "1.52v",
+    "org.scalatest" %% "scalatest" % "3.1.1" % "test",
   ),
   resolvers += Resolver.sonatypeRepo("snapshots"),
   //
@@ -77,7 +77,7 @@ lazy val ijp_debayer2sx_core = project.in(file("ijp-debayer2sx-core"))
     name        := "ijp-debayer2sx-core",
     description := "IJP DeBayer2SX Core",
     commonSettings,
-    libraryDependencies += "com.beachape" %% "enumeratum" % "1.5.13",
+    libraryDependencies += "com.beachape" %% "enumeratum" % "1.5.15",
   )
 
 lazy val ijp_debayer2sx_plugins = project.in(file("ijp-debayer2sx-plugins"))
