@@ -1,6 +1,6 @@
 /*
  * Image/J Plugins
- * Copyright (C) 2002-2019 Jarek Sacha
+ * Copyright (C) 2002-2020 Jarek Sacha
  * Author's email: jpsacha at gmail [dot] com
  *
  * This library is free software; you can redistribute it and/or
@@ -20,7 +20,7 @@
  * Latest release available at https://github.com/ij-plugins/ijp-DeBayer2SX
  */
 
-package net.sf.ijplugins.util
+package net.sf.ijplugins.debayer2sx
 
 import java.awt._
 import java.io.IOException
