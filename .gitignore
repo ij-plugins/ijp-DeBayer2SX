@@ -5,3 +5,5 @@ syntax: glob
 /.idea
 target
 sandbox
+/null/
+tmp/
