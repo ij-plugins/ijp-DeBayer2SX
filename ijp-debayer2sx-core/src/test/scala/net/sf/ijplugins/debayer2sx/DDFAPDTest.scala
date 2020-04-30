@@ -1,6 +1,6 @@
 /*
  * Image/J Plugins
- * Copyright (C) 2002-2019 Jarek Sacha
+ * Copyright (C) 2002-2020 Jarek Sacha
  * Author's email: jpsacha at gmail [dot] com
  *
  * This library is free software; you can redistribute it and/or
@@ -17,7 +17,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Latest release available at http://sourceforge.net/projects/ij-plugins/
+ * Latest release available at https://github.com/ij-plugins/ijp-DeBayer2SX
  */
 
 package net.sf.ijplugins.debayer2sx
@@ -26,10 +26,12 @@ import ij.IJ
 import ij.process.{ByteProcessor, ColorProcessor, FloatProcessor, ShortProcessor}
 import net.sf.ijplugins.debayer2sx.DDFAPD._
 import net.sf.ijplugins.debayer2sx.process.add
-import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 
-class DDFAPDTest extends FlatSpec with BeforeAndAfter with Matchers {
+class DDFAPDTest extends AnyFlatSpec with BeforeAndAfter with Matchers {
 
   behavior of "DDFAPDTest"
 

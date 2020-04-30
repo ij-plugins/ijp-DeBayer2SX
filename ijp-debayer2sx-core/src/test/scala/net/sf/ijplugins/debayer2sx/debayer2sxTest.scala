@@ -1,6 +1,6 @@
 /*
  * Image/J Plugins
- * Copyright (C) 2002-2019 Jarek Sacha
+ * Copyright (C) 2002-2020 Jarek Sacha
  * Author's email: jpsacha at gmail [dot] com
  *
  * This library is free software; you can redistribute it and/or
@@ -17,7 +17,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Latest release available at http://sourceforge.net/projects/ij-plugins/
+ * Latest release available at https://github.com/ij-plugins/ijp-DeBayer2SX
  */
 
 package net.sf.ijplugins.debayer2sx
@@ -26,9 +26,10 @@ import ij.IJ
 import ij.process.{ByteProcessor, ColorProcessor}
 import net.sf.ijplugins.debayer2sx.DeBayer2Config.MosaicOrder
 import net.sf.ijplugins.debayer2sx.Utils.compare
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class debayer2sxTest extends FlatSpec with Matchers {
+class debayer2sxTest extends AnyFlatSpec with Matchers {
 
   behavior of "package debayer2sx"
 

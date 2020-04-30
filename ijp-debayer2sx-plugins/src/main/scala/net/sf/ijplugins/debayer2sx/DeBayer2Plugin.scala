@@ -1,6 +1,6 @@
 /*
  * Image/J Plugins
- * Copyright (C) 2002-2019 Jarek Sacha
+ * Copyright (C) 2002-2020 Jarek Sacha
  * Author's email: jpsacha at gmail [dot] com
  *
  * This library is free software; you can redistribute it and/or
@@ -17,7 +17,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Latest release available at http://sourceforge.net/projects/ij-plugins/
+ * Latest release available at https://github.com/ij-plugins/ijp-DeBayer2SX
  */
 
 package net.sf.ijplugins.debayer2sx
@@ -27,7 +27,6 @@ import ij.plugin.PlugIn
 import ij.plugin.filter.PlugInFilter
 import ij.{CompositeImage, IJ, ImagePlus}
 import net.sf.ijplugins.debayer2sx.DeBayer2Config.{Demosaicing, MosaicOrder}
-import net.sf.ijplugins.util.IJPUtils
 
 object DeBayer2Plugin {
   private var config: DeBayer2Config = DeBayer2Config()

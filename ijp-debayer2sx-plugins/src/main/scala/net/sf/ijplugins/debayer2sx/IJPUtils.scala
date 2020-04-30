@@ -1,6 +1,6 @@
 /*
  * Image/J Plugins
- * Copyright (C) 2002-2019 Jarek Sacha
+ * Copyright (C) 2002-2020 Jarek Sacha
  * Author's email: jpsacha at gmail [dot] com
  *
  * This library is free software; you can redistribute it and/or
@@ -17,10 +17,10 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Latest release available at http://sourceforge.net/projects/ij-plugins/
+ * Latest release available at https://github.com/ij-plugins/ijp-DeBayer2SX
  */
 
-package net.sf.ijplugins.util
+package net.sf.ijplugins.debayer2sx
 
 import java.awt._
 import java.io.IOException
@@ -104,7 +104,7 @@ object IJPUtils {
     // TODO: use icon with rounded corners
     val rootPanel = new Panel(new BorderLayout(7, 7))
     val titlePanel = new Panel(new BorderLayout(7, 7))
-    val logo = IJPUtils.loadIcon(this.getClass, "/net/sf/ijplugins/IJP-48.png")
+    val logo = IJPUtils.loadIcon(this.getClass, "/net/sf/ijplugins/debayer2sx/IJP-48.png")
     if (logo != null) {
       val logoLabel = new JLabel(logo, SwingConstants.CENTER)
       logoLabel.setAlignmentX(Component.CENTER_ALIGNMENT)
