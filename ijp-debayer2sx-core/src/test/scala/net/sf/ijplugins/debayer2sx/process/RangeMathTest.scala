@@ -1,6 +1,6 @@
 /*
  * Image/J Plugins
- * Copyright (C) 2002-2019 Jarek Sacha
+ * Copyright (C) 2002-2020 Jarek Sacha
  * Author's email: jpsacha at gmail [dot] com
  *
  * This library is free software; you can redistribute it and/or
@@ -22,9 +22,11 @@
 
 package net.sf.ijplugins.debayer2sx.process
 
-import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class RangeMathTest extends FlatSpec with BeforeAndAfter with Matchers {
+class RangeMathTest extends AnyFlatSpec with BeforeAndAfter with Matchers {
 
   behavior of "RangeMath"
 

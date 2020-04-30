@@ -25,9 +25,11 @@ package net.sf.ijplugins.debayer2sx
 import ij.process.ColorProcessor
 import net.sf.ijplugins.debayer2sx.DeBayer2Config.{Demosaicing, MosaicOrder}
 import net.sf.ijplugins.debayer2sx.Utils._
-import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class DeBayer2Test extends FlatSpec with Matchers with BeforeAndAfter {
+class DeBayer2Test extends AnyFlatSpec with Matchers with BeforeAndAfter {
 
   private val meanDistanceTolerance = 1.5
   private var refCP: ColorProcessor = _
