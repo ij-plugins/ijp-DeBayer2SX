@@ -112,7 +112,7 @@ object IJPUtils {
     }
     val titleLabel = new JLabel(title)
     val font = titleLabel.getFont
-    titleLabel.setFont(font.deriveFont(Font.BOLD, font.getSize * 2))
+    titleLabel.setFont(font.deriveFont(Font.BOLD, font.getSize * 2f))
     titlePanel.add(titleLabel, BorderLayout.CENTER)
 
     rootPanel.add(titlePanel, BorderLayout.NORTH)
