@@ -6,8 +6,8 @@ import xerial.sbt.Sonatype.GitHubHosting
 
 name := "ijp-debayer2sx"
 
-val _version = "1.1.0-SNAPSHOT"
-val _scalaVersions = Seq("2.13.2", "2.12.11")
+val _version = "1.1.0"
+val _scalaVersions = Seq("2.13.1", "2.12.11")
 val _scalaVersion  = _scalaVersions.head
 
 version         := _version
