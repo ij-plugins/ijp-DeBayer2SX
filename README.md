@@ -47,4 +47,5 @@ sbt:ijp_debayer2sx_plugins> ijRun
 ```
 
 [bayer-filter]: https://en.wikipedia.org/wiki/Bayer_filter
-[debayer]: http://umanitoba.ca/faculties/science/astronomy/jwest/plugins.html
+
+[debayer]: https://github.com/ij-plugins/ijp-DeBayer2SX/wiki/DeBayer1
