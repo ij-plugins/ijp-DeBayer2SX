@@ -38,7 +38,7 @@ class DeBayer2Plugin extends PlugIn {
 
   private val Title = "DeBayer2"
   private val Description = "Convert a bayer pattern image to a color image."
-  private val HelpURL = "https://github.com/ij-plugins/ijp-DeBayer2SX"
+  private val HelpURL = "https://github.com/ij-plugins/ijp-DeBayer2SX/wiki/DeBayer2"
 
   protected def Flags: Int = PlugInFilter.DOES_8G + PlugInFilter.DOES_16
 

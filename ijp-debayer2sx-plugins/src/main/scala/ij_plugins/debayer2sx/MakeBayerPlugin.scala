@@ -38,7 +38,7 @@ class MakeBayerPlugin extends PlugIn {
 
   private val Title = "Make Bayer"
   private val Description = "Convert color image to Bayer pattern image."
-  private val HelpURL = "https://github.com/ij-plugins/ijp-DeBayer2SX"
+  private val HelpURL = "https://github.com/ij-plugins/ijp-DeBayer2SX/wiki/Make-Bayer"
 
   override def run(arg: String): Unit = {
 
