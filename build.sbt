@@ -48,8 +48,8 @@ val commonSettings = Seq(
   javacOptions  ++= Seq("-deprecation", "-Xlint"),
   //
   libraryDependencies ++= Seq(
-    "net.imagej"     % "ij"        % "1.52v",
-    "org.scalatest" %% "scalatest" % "3.1.1" % "test",
+    "net.imagej"     % "ij"        % "1.53g",
+    "org.scalatest" %% "scalatest" % "3.2.3" % "test",
   ),
   resolvers += Resolver.sonatypeRepo("snapshots"),
   //
@@ -77,7 +77,7 @@ lazy val ijp_debayer2sx_core = project.in(file("ijp-debayer2sx-core"))
     name        := "ijp-debayer2sx-core",
     description := "IJP DeBayer2SX Core",
     commonSettings,
-    libraryDependencies += "com.beachape" %% "enumeratum" % "1.5.15",
+    libraryDependencies += "com.beachape" %% "enumeratum" % "1.6.1",
   )
 
 lazy val ijp_debayer2sx_plugins = project.in(file("ijp-debayer2sx-plugins"))
