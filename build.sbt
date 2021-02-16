@@ -1,6 +1,6 @@
-import java.net.URL
-
 import xerial.sbt.Sonatype.GitHubHosting
+
+import java.net.URL
 
 // @formatter:off
 
@@ -66,7 +66,7 @@ val commonSettings = Seq(
   publishMavenStyle := true,
   sonatypeProfileName := "net.sf.ij-plugins",
   sonatypeProjectHosting := Some(GitHubHosting("ij-plugins", "ijp-debayer2sx", "jpsacha@gmail.com")),
-  publishTo := sonatypePublishTo.value,
+  publishTo := sonatypePublishToBundle.value,
   developers := List(
     Developer(id="jpsacha", name="Jarek Sacha", email="jpsacha@gmail.com", url=url("https://github.com/jpsacha"))
   )
