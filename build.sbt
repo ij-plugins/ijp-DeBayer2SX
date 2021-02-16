@@ -129,3 +129,6 @@ ijPluginsSubDir         := "ij-plugins"
 ijCleanBeforePrepareRun := true
 // Instruct `clean` to delete created plugins subdirectory created by `ijRun`/`ijPrepareRun`.
 cleanFiles += ijPluginsDir.value
+
+
+addCommandAlias("ijRun", "ijp_debayer2sx_plugins/ijRun")
