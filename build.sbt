@@ -1,13 +1,13 @@
-import java.net.URL
-
 import xerial.sbt.Sonatype.GitHubHosting
+
+import java.net.URL
 
 // @formatter:off
 
 name := "ijp-debayer2sx"
 
-val _version = "1.1.0"
-val _scalaVersions = Seq("2.13.1", "2.12.11")
+val _version = "1.1.1.0-SNAPSHOT"
+val _scalaVersions = Seq("2.13.4", "2.12.13")
 val _scalaVersion  = _scalaVersions.head
 
 version         := _version
@@ -48,8 +48,8 @@ val commonSettings = Seq(
   javacOptions  ++= Seq("-deprecation", "-Xlint"),
   //
   libraryDependencies ++= Seq(
-    "net.imagej"     % "ij"        % "1.52v",
-    "org.scalatest" %% "scalatest" % "3.1.1" % "test",
+    "net.imagej"     % "ij"        % "1.53g",
+    "org.scalatest" %% "scalatest" % "3.2.3" % "test",
   ),
   resolvers += Resolver.sonatypeRepo("snapshots"),
   //
@@ -66,7 +66,7 @@ val commonSettings = Seq(
   publishMavenStyle := true,
   sonatypeProfileName := "net.sf.ij-plugins",
   sonatypeProjectHosting := Some(GitHubHosting("ij-plugins", "ijp-debayer2sx", "jpsacha@gmail.com")),
-  publishTo := sonatypePublishTo.value,
+  publishTo := sonatypePublishToBundle.value,
   developers := List(
     Developer(id="jpsacha", name="Jarek Sacha", email="jpsacha@gmail.com", url=url("https://github.com/jpsacha"))
   )
@@ -77,7 +77,7 @@ lazy val ijp_debayer2sx_core = project.in(file("ijp-debayer2sx-core"))
     name        := "ijp-debayer2sx-core",
     description := "IJP DeBayer2SX Core",
     commonSettings,
-    libraryDependencies += "com.beachape" %% "enumeratum" % "1.5.15",
+    libraryDependencies += "com.beachape" %% "enumeratum" % "1.6.1",
   )
 
 lazy val ijp_debayer2sx_plugins = project.in(file("ijp-debayer2sx-plugins"))
@@ -129,3 +129,6 @@ ijPluginsSubDir         := "ij-plugins"
 ijCleanBeforePrepareRun := true
 // Instruct `clean` to delete created plugins subdirectory created by `ijRun`/`ijPrepareRun`.
 cleanFiles += ijPluginsDir.value
+
+
+addCommandAlias("ijRun", "ijp_debayer2sx_plugins/ijRun")
