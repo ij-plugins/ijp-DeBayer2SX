@@ -48,8 +48,8 @@ val commonSettings = Seq(
   javacOptions  ++= Seq("-deprecation", "-Xlint"),
   //
   libraryDependencies ++= Seq(
-    "net.imagej"     % "ij"        % "1.53g",
-    "org.scalatest" %% "scalatest" % "3.2.5" % "test",
+    "net.imagej"     % "ij"        % "1.53i",
+    "org.scalatest" %% "scalatest" % "3.2.7" % "test",
   ),
   resolvers += Resolver.sonatypeRepo("snapshots"),
   //
