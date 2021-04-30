@@ -49,7 +49,7 @@ val commonSettings = Seq(
   //
   libraryDependencies ++= Seq(
     "net.imagej"     % "ij"        % "1.53i",
-    "org.scalatest" %% "scalatest" % "3.2.7" % "test",
+    "org.scalatest" %% "scalatest" % "3.2.8"  % "test",
   ),
   resolvers += Resolver.sonatypeRepo("snapshots"),
   //
