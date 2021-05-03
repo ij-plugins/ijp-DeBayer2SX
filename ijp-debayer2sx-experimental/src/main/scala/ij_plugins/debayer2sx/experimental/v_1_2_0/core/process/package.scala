@@ -20,7 +20,7 @@
  * Latest release available at https://github.com/ij-plugins/ijp-DeBayer2SX
  */
 
-package ij_plugins.debayer2sx
+package ij_plugins.debayer2sx.experimental.v_1_2_0.core
 
 import ij.process.{FloatProcessor, ImageProcessor}
 
@@ -30,9 +30,9 @@ package object process {
   /** Marker object that represent full range for a given processor. Similar to ":" in MATLAB. */
   val FR = Range(Int.MinValue, Int.MaxValue)
 
-  implicit def wrapRange(r: Range): RangeMath = new RangeMath(r)
+  implicit def wraRange(r: Range): RangeMath = new RangeMath(r)
 
-  implicit def wrapFloatProcessor(fp: FloatProcessor): FloatProcessorMath = new FloatProcessorMath(fp)
+  implicit def wraFloatProcessor(fp: FloatProcessor): FloatProcessorMath = new FloatProcessorMath(fp)
 
 
   def add(a: Array[Float], b: Array[Float]): Array[Float] = {
@@ -63,51 +63,26 @@ package object process {
     * @param srcRangeX source X range
     * @param srcRangeY source Y range
     */
-  final def copyRanges(dstIP: ImageProcessor, dstRangeX: Range, dstRangeY: Range,
-                       srcIP: ImageProcessor, srcRangeX: Range, srcRangeY: Range): Unit = {
-    import io.github.metarank.cfor._
+  def copyRanges(dstIP: ImageProcessor, dstRangeX: Range, dstRangeY: Range,
+                 srcIP: ImageProcessor, srcRangeX: Range, srcRangeY: Range): Unit = {
 
     val _dstRangeX = if (dstRangeX == FR) Range(0, dstIP.getWidth) else dstRangeX
     val _dstRangeY = if (dstRangeY == FR) Range(0, dstIP.getHeight) else dstRangeY
     val _srcRangeX = if (srcRangeX == FR) Range(0, srcIP.getWidth) else srcRangeX
     val _srcRangeY = if (srcRangeY == FR) Range(0, srcIP.getHeight) else srcRangeY
 
-    val (dstXStart, dstXEnd, dstXStep) = sortedRangeParams(_dstRangeX)
-    val (dstYStart, dstYEnd, dstYStep) = sortedRangeParams(_dstRangeY)
-
-    cfor(dstYStart)(_ < dstYEnd, _ + dstYStep) { y =>
+    for (y <- _dstRangeY) {
       val indexY = (y - _dstRangeY.start) / _dstRangeY.step
       val srcY = _srcRangeY.start + indexY * _srcRangeY.step
-      val srcYOffset = srcY * srcIP.getWidth
-      val dstYOffset = y * dstIP.getWidth
 
-      cfor(dstXStart)(_ < dstXEnd, _ + dstXStep) { x =>
+      for (x <- _dstRangeX) {
         val indexX = (x - _dstRangeX.start) / _dstRangeX.step
         val srcX = _srcRangeX.start + indexX * _srcRangeX.step
 
-        val v = srcIP.getf(srcX + srcYOffset)
-        dstIP.setf(x + dstYOffset, v)
+        val v = srcIP.getf(srcX, srcY)
+        dstIP.setf(x, y, v)
       }
     }
-  }
-
-
-  @inline
-  final def duplicate(src: FloatProcessor): FloatProcessor = {
-    val dst = new FloatProcessor(src.getWidth, src.getHeight)
-    val srcPixels = src.getPixels.asInstanceOf[Array[Float]]
-    val dstPixels = dst.getPixels.asInstanceOf[Array[Float]]
-    System.arraycopy(srcPixels, 0, dstPixels, 0, srcPixels.length)
-    dst
-  }
-
-
-  @inline
-  final def sortedRangeParams(range: Range): (Int, Int, Int) = {
-    if (range.step >= 0)
-      (range.start, range.end, range.step)
-    else
-      (range.end + 1, range.start + 1, -range.step)
   }
 
 

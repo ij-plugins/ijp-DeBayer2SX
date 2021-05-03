@@ -78,6 +78,7 @@ lazy val ijp_debayer2sx_core = project.in(file("ijp-debayer2sx-core"))
     description := "IJP DeBayer2SX Core",
     commonSettings,
     libraryDependencies += "com.beachape" %% "enumeratum" % "1.6.1",
+    libraryDependencies += "io.github.metarank" %% "cfor" % "0.2"
   )
 
 lazy val ijp_debayer2sx_plugins = project.in(file("ijp-debayer2sx-plugins"))
