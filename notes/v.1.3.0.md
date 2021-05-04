@@ -1,7 +1,8 @@
 ijp-DeBayer2SX v.1.3.0
 ======================
 
-Main feature is improved performance of DDFPD implementation. It is now twice as fast as a v.1.2.0.
+The main feature of this release is an improved performance of the DDFPD implementation. It is now twice as fast as
+v.1.2.0.
 
 * Better error code for Bayer images with odd sizes [#13]
 * Support running on Java 8 [#14]
