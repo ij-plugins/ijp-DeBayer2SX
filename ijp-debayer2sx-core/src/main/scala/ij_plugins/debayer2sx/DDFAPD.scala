@@ -70,6 +70,10 @@ object DDFAPD {
     * @return reconstructed image as stack of bands
     */
   def debayerGR(bay: FloatProcessor, bpp: Int, doRefine: Boolean): ImageStack = {
+    require(bay.getWidth > 0, s"Image width must be greater than 0, got ${bay.getWidth}.")
+    require(bay.getWidth % 2 == 0, s"Image width must be even (multiple of 2), got ${bay.getWidth}.")
+    require(bay.getHeight > 0, s"Image height must be greater than 0, got ${bay.getHeight}.")
+    require(bay.getHeight % 2 == 0, s"Image height must be even (multiple of 2), got ${bay.getHeight}.")
 
     //
     // Horizontal and vertical interpolation of the green channel
