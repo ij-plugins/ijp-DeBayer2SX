@@ -34,8 +34,13 @@ val commonSettings = Seq(
     "-feature",
     "-explaintypes",
     "-release", "8",
-    "-target:8"
   ),
+  scalacOptions ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, 13)) => Seq("-target:8")
+      case _ => Seq.empty[String]
+    }
+  },
   Compile / doc / scalacOptions ++= Opts.doc.title("IJP Debayer2SX API"),
   Compile / doc / scalacOptions ++= Opts.doc.version(_version),
   Compile / doc / scalacOptions ++= Seq(
