@@ -23,7 +23,7 @@ Demasaicing (Bayer patter reconstruction) algorithms implemented, all support 8 
 
 Prebuild binaries are published with each [Release](https://github.com/ij-plugins/ijp-DeBayer2SX/releases).
 
-1. Look for in the asset section for an "ijp-DeBayer2SX-v.*.zip" file,
+1. Look for in the asset section for an "ijp-debayer2sx_v.*.zip" file,
 2. download and unzip into ImageJ's `plugins` directory. It should create subdirectory "ij-plugins".
 3. Restart ImageJ
 
