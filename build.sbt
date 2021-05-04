@@ -6,14 +6,14 @@ import java.net.URL
 
 name := "ijp-debayer2sx"
 
-val _version = "1.2.0"
-val _scalaVersions = Seq("2.13.4", "2.12.13")
+val _version = "1.2.0.1-SNAPSHOT"
+val _scalaVersions = Seq("2.13.5", "2.12.13")
 val _scalaVersion  = _scalaVersions.head
 
 version         := _version
 scalaVersion    := _scalaVersion
 publishArtifact := false
-skip in publish := true
+publish / skip  := true
 sonatypeProfileName := "net.sf.ij-plugins"
 
 val commonSettings = Seq(
@@ -32,24 +32,31 @@ val commonSettings = Seq(
     "-deprecation", 
     "-Xlint", 
     "-feature",
-    "-explaintypes", 
+    "-explaintypes",
+    "-release", "8",
   ),
-  scalacOptions in(Compile, doc) ++= Opts.doc.title("IJP Debayer2SX API"),
-  scalacOptions in(Compile, doc) ++= Opts.doc.version(_version),
-  scalacOptions in(Compile, doc) ++= Seq(
+  scalacOptions ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, 13)) => Seq("-target:8")
+      case _ => Seq.empty[String]
+    }
+  },
+  Compile / doc / scalacOptions ++= Opts.doc.title("IJP Debayer2SX API"),
+  Compile / doc / scalacOptions ++= Opts.doc.version(_version),
+  Compile / doc / scalacOptions ++= Seq(
     "-doc-footer", s"IJP Debayer2SX API v.${_version}",
     "-doc-root-content", baseDirectory.value + "/src/main/scala/root-doc.creole"
   ),
-  scalacOptions in(Compile, doc) ++= (
+  Compile / doc / scalacOptions ++= (
     Option(System.getenv("GRAPHVIZ_DOT_PATH")) match {
       case Some(path) => Seq("-diagrams", "-diagrams-dot-path", path, "-diagrams-debug")
       case None => Seq.empty[String]
     }),
-  javacOptions  ++= Seq("-deprecation", "-Xlint"),
+  Compile / compile / javacOptions ++= Seq("-deprecation", "-Xlint", "-source",  "1.8", "-target",  "1.8"),
   //
   libraryDependencies ++= Seq(
-    "net.imagej"     % "ij"        % "1.53g",
-    "org.scalatest" %% "scalatest" % "3.2.3" % "test",
+    "net.imagej"     % "ij"        % "1.53i",
+    "org.scalatest" %% "scalatest" % "3.2.8"  % "test",
   ),
   resolvers += Resolver.sonatypeRepo("snapshots"),
   //
@@ -78,6 +85,7 @@ lazy val ijp_debayer2sx_core = project.in(file("ijp-debayer2sx-core"))
     description := "IJP DeBayer2SX Core",
     commonSettings,
     libraryDependencies += "com.beachape" %% "enumeratum" % "1.6.1",
+    libraryDependencies += "io.github.metarank" %% "cfor" % "0.2"
   )
 
 lazy val ijp_debayer2sx_plugins = project.in(file("ijp-debayer2sx-plugins"))
@@ -93,7 +101,7 @@ lazy val ijp_debayer2sx_demos = project.in(file("ijp-debayer2sx-demos"))
     name        := "ijp-debayer2sx-demos",
     description := "IJP DeBayer2SX Demos",
     publishArtifact := false,
-    skip in publish := true)
+    publish / skip  := true)
   .dependsOn(ijp_debayer2sx_core)
 
 lazy val ijp_debayer2sx_experimental = project.in(file("ijp-debayer2sx-experimental"))
@@ -101,7 +109,7 @@ lazy val ijp_debayer2sx_experimental = project.in(file("ijp-debayer2sx-experimen
     name        := "ijp-debayer2sx-experimental",
     description := "Experimental Features",
     publishArtifact := false,
-    skip in publish := true)
+    publish / skip  := true)
   .dependsOn(ijp_debayer2sx_core)
 
 lazy val manifestSetting = packageOptions += {
@@ -118,9 +126,6 @@ lazy val manifestSetting = packageOptions += {
     "Implementation-Vendor"    -> organization.value
   )
 }
-
-// Set the prompt (for this build) to include the project id.
-shellPrompt in ThisBuild := { state => "sbt:" + Project.extract(state).currentRef.project + "> " }
 
 // Enable and customize `sbt-imagej` plugin
 enablePlugins(SbtImageJ)

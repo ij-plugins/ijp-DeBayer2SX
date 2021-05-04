@@ -20,9 +20,9 @@
  * Latest release available at https://github.com/ij-plugins/ijp-DeBayer2SX
  */
 
-package ij_plugins.debayer2sx.process
+package ij_plugins.debayer2sx.experimental.v_1_2_0.core.process
 
-import ij.process.{Blitter, FloatBlitter, FloatProcessor}
+import ij.process.{Blitter, FloatProcessor}
 
 import scala.language.implicitConversions
 
@@ -86,9 +86,8 @@ final class FloatProcessorMath(val fp: FloatProcessor) {
     require(fp.getWidth == other.getWidth)
     require(fp.getHeight == other.getHeight)
 
-    //    val r = fp.duplicate().asInstanceOf[FloatProcessor]
-    val r = duplicate(fp)
-    new FloatBlitter(r).copyBits(other, 0, 0, Blitter.ADD)
+    val r = fp.duplicate().asInstanceOf[FloatProcessor]
+    r.copyBits(other, 0, 0, Blitter.ADD)
     r
   }
 
@@ -101,9 +100,8 @@ final class FloatProcessorMath(val fp: FloatProcessor) {
     require(fp.getWidth == other.getWidth)
     require(fp.getHeight == other.getHeight)
 
-    //    val r = fp.duplicate().asInstanceOf[FloatProcessor]
-    val r = duplicate(fp)
-    new FloatBlitter(r).copyBits(other, 0, 0, Blitter.SUBTRACT)
+    val r = fp.duplicate().asInstanceOf[FloatProcessor]
+    r.copyBits(other, 0, 0, Blitter.SUBTRACT)
     r
   }
 
@@ -114,8 +112,7 @@ final class FloatProcessorMath(val fp: FloatProcessor) {
     */
   def /(v: Double): FloatProcessor = {
 
-    //    val r = fp.duplicate().asInstanceOf[FloatProcessor]
-    val r = duplicate(fp)
+    val r = fp.duplicate().asInstanceOf[FloatProcessor]
     r.multiply(1 / v)
     r
   }
@@ -127,39 +124,23 @@ final class FloatProcessorMath(val fp: FloatProcessor) {
     */
   def *(v: Double): FloatProcessor = {
 
-    //    val r = fp.duplicate().asInstanceOf[FloatProcessor]
-    val r = duplicate(fp)
+    val r = fp.duplicate().asInstanceOf[FloatProcessor]
     r.multiply(v)
     r
   }
 
   @inline
-  private[this] def slice(src: FloatProcessor, srcRangeX: Range, srcRangeY: Range): FloatProcessor = {
-    import io.github.metarank.cfor._
-
+  private def slice(src: FloatProcessor, srcRangeX: Range, srcRangeY: Range): FloatProcessor = {
     // bay(1:2:m,2:2:n)
     val _srcRangeX = if (srcRangeX == FR) Range(0, src.getWidth) else srcRangeX
     val _srcRangeY = if (srcRangeY == FR) Range(0, src.getHeight) else srcRangeY
 
-    val (xStart, xEnd, xStep) = sortedRangeParams(_srcRangeX)
-    val (yStart, yEnd, yStep) = sortedRangeParams(_srcRangeY)
-
-    val srcWidth = src.getWidth
-    val srcPixels = src.getPixels.asInstanceOf[Array[Float]]
-
-    val dstWidth = _srcRangeX.length
-    val dstHeight = _srcRangeY.length
-    val dst = new FloatProcessor(dstWidth, dstHeight)
-    val dstPixels = dst.getPixels.asInstanceOf[Array[Float]]
-
-    cfor(yStart)(_ < yEnd, _ + yStep) { y =>
-      val srcOffsetY = y * srcWidth
+    val dst = new FloatProcessor(_srcRangeX.length, _srcRangeY.length)
+    for (x <- _srcRangeX; y <- _srcRangeY) {
+      val v = src.getf(x, y)
+      val dstX = (x - _srcRangeX.start) / _srcRangeX.step
       val dstY = (y - _srcRangeY.start) / _srcRangeY.step
-      val dstOffsetY = dstY * dstWidth
-      cfor(xStart)(_ < xEnd, _ + xStep) { x =>
-        val dstX = (x - _srcRangeX.start) / _srcRangeX.step
-        dstPixels(dstX + dstOffsetY) = srcPixels(x + srcOffsetY)
-      }
+      dst.setf(dstX, dstY, v)
     }
     dst
   }

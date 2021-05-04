@@ -106,6 +106,17 @@ class DDFAPDTest extends AnyFlatSpec with BeforeAndAfter with Matchers {
     Utils.compare(cp, cpRef)
   }
 
+  it should "should throw IllegalArgumentException for images with odd sizes" in {
+    val bp = new ByteProcessor(347, 440)
+    assertThrows[IllegalArgumentException] {
+      DDFAPD.debayerGR(bp, doRefine = true)
+    }
+
+    assertThrows[IllegalArgumentException] {
+      DDFAPD.debayerGR(bp.convertToFloatProcessor(), 8, doRefine = true)
+    }
+  }
+
   before {
 
     val pixels = Array[Short](

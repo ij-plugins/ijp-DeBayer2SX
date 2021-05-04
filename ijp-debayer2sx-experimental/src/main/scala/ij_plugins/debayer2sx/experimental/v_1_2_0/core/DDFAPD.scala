@@ -20,12 +20,12 @@
  * Latest release available at https://github.com/ij-plugins/ijp-DeBayer2SX
  */
 
-package ij_plugins.debayer2sx
+package ij_plugins.debayer2sx.experimental.v_1_2_0.core
 
 import ij.ImageStack
 import ij.plugin.filter.Convolver
-import ij.process._
-import ij_plugins.debayer2sx.process.{FR, add, copyRanges, _}
+import ij.process.{Blitter, ByteProcessor, ColorProcessor, FloatProcessor}
+import ij_plugins.debayer2sx.experimental.v_1_2_0.core.process.{FR, add, copyRanges, _}
 
 import java.awt.Rectangle
 
@@ -70,10 +70,6 @@ object DDFAPD {
     * @return reconstructed image as stack of bands
     */
   def debayerGR(bay: FloatProcessor, bpp: Int, doRefine: Boolean): ImageStack = {
-    require(bay.getWidth > 0, s"Image width must be greater than 0, got ${bay.getWidth}.")
-    require(bay.getWidth % 2 == 0, s"Image width must be even (multiple of 2), got ${bay.getWidth}.")
-    require(bay.getHeight > 0, s"Image height must be greater than 0, got ${bay.getHeight}.")
-    require(bay.getHeight % 2 == 0, s"Image height must be even (multiple of 2), got ${bay.getHeight}.")
 
     //
     // Horizontal and vertical interpolation of the green channel
@@ -177,9 +173,9 @@ object DDFAPD {
       )
 
       // f1=filtImg(h1+[0 0 1 0 0],G0,1);
-      val f11 = filtImg(add(h1, Array(0f, 0f, 1f, 0f, 0f)), G0, 1)
+      val f11 = filtImg(add(h1, Array(0f, 0f, 1f, 0f, 0f)), G0.convertToFloatProcessor(), 1)
       // f2 = filtImg(h0, R1, 1)
-      val f21 = filtImg(h0, R1, 1)
+      val f21 = filtImg(h0, R1.convertToFloatProcessor(), 1)
 
       // Gh=zeros(m,n);
       val Gh = new FloatProcessor(w, h)
@@ -199,9 +195,9 @@ object DDFAPD {
       copyRanges(G1, Range(1, w, 2), FR, /* = */ bay, Range(1, w, 2), Range(1, h, 2))
 
       // f1=filtImg(h1+[0,0,1,0,0],G1,1);
-      val f12 = filtImg(add(h1, Array(0f, 0f, 1f, 0f, 0f)), G1, 1)
+      val f12 = filtImg(add(h1, Array(0f, 0f, 1f, 0f, 0f)), G1.convertToFloatProcessor(), 1)
       // f2=filtImg(h0,B0,1);
-      val f22 = filtImg(h0, B0, 1)
+      val f22 = filtImg(h0, B0.convertToFloatProcessor(), 1)
       // Gh(2:2:m,:)=f1+f2;
       copyRanges(Gh, FR, Range(1, h, 2), /* = */ f12 + f22, FR, FR)
       Gh
@@ -227,9 +223,9 @@ object DDFAPD {
       copyRanges(B1, FR, Range(1, h, 2), /* = */ bay, Range(0, w, 2), Range(1, h, 2))
 
       // f1=filtImg([0 0 1 0 0]+h1,G0,2);
-      val f11 = filtImg(add(Array(0f, 0f, 1f, 0f, 0f), h1), G0, 2)
+      val f11 = filtImg(add(Array(0f, 0f, 1f, 0f, 0f), h1), G0.convertToFloatProcessor(), 2)
       // f2=filtImg(h0,B1,2);
-      val f21 = filtImg(h0, B1, 2)
+      val f21 = filtImg(h0, B1.convertToFloatProcessor(), 2)
 
       // Gv(:,1:2:n)=f1+f2;
       copyRanges(Gv, Range(0, w, 2), FR, /* = */ f11 + f21, FR, FR)
@@ -247,9 +243,9 @@ object DDFAPD {
       copyRanges(G1, FR, Range(1, h, 2), /* = */ bay, Range(1, w, 2), Range(1, h, 2))
 
       // f1=filtImg(h1+[0 0 1 0 0],G1,2);
-      val f12 = filtImg(add(h1, Array(0f, 0f, 1f, 0f, 0f)), G1, 2)
+      val f12 = filtImg(add(h1, Array(0f, 0f, 1f, 0f, 0f)), G1.convertToFloatProcessor(), 2)
       // f2=filtImg(h0,R0,2);
-      val f22 = filtImg(h0, R0, 2)
+      val f22 = filtImg(h0, R0.convertToFloatProcessor(), 2)
 
       // Gv(:,2:2:n)=f1+f2;
       copyRanges(Gv, Range(1, w, 2), FR, /* = */ f12 + f22, FR, FR)
@@ -279,10 +275,8 @@ object DDFAPD {
 
       //    y=conv2(1,h,xx,'valid');
       new Convolver().convolveFloat1D(xx, hh, hh.length, 1, 1)
-      val cropROI = new Rectangle(B, 0, w, h)
-      //      xx.setRoi(cropROI)
-      //      xx.crop().asInstanceOf[FloatProcessor]
-      crop(xx, cropROI)
+      xx.setRoi(new Rectangle(B, 0, w, h))
+      xx.crop().asInstanceOf[FloatProcessor]
     } else if (dir == 2) {
       // Add mirroring of the borders
       // xx = [x(1+B:-1:2,:); x; x(m-1:-1:m-B,:)];
@@ -290,40 +284,13 @@ object DDFAPD {
 
       // y=conv2(h,1,xx,'valid');
       new Convolver().convolveFloat1D(xx, hh, 1, hh.length, 1)
-      val cropROI = new Rectangle(0, B, w, h)
-      //      xx.setRoi(cropROI)
-      //      xx.crop().asInstanceOf[FloatProcessor]
-      crop(xx, cropROI)
+      xx.setRoi(new Rectangle(0, B, w, h))
+      xx.crop().asInstanceOf[FloatProcessor]
     } else {
       throw new IllegalArgumentException("Invalid `dir` value:" + dir)
     }
 
     y
-  }
-
-  private[this] def crop(src: FloatProcessor, roi: Rectangle): FloatProcessor = {
-    import io.github.metarank.cfor._
-
-    val width = src.getWidth
-    val pixels = src.getPixels.asInstanceOf[Array[Float]]
-    val roiX = roi.x
-    val roiY = roi.y
-    val roiWidth = roi.width
-    val roiHeight = roi.height
-    val ip2 = new FloatProcessor(roiWidth, roiHeight)
-    val pixels2 = ip2.getPixels.asInstanceOf[Array[Float]]
-    //    for (ys <- roiY until roiY + roiHeight) {
-    cfor(roiY)(_ < roiY + roiHeight, _ + 1) { ys =>
-      var offset1 = (ys - roiY) * roiWidth
-      var offset2 = ys * width + roiX
-      //      for (xs <- 0 until roiWidth) {
-      cfor(0)(_ < roiWidth, _ + 1) { _ =>
-        pixels2(offset1) = pixels(offset2)
-        offset1 += 1
-        offset2 += 1
-      }
-    }
-    ip2
   }
 
   /**
@@ -337,14 +304,12 @@ object DDFAPD {
     * @param ip  image to check
     * @param bpp bits per pixel
     */
-  private[this] def checkImg(ip: FloatProcessor, bpp: Int): Unit = {
-    import io.github.metarank.cfor._
+  private def checkImg(ip: FloatProcessor, bpp: Int): Unit = {
 
     val maxVal = (math.pow(2, bpp) - 1).toFloat
     val pixels = ip.getPixels.asInstanceOf[Array[Float]]
 
-    //    for (i <- pixels.indices) {
-    cfor(0)(_ < pixels.length, _ + 1) { i =>
+    for (i <- pixels.indices) {
       val v = pixels(i)
       if (v > maxVal) {
         pixels(i) = maxVal
@@ -957,10 +922,9 @@ object DDFAPD {
     val xx1 = x(Range(1 + b - 1, 2 - 2, -1), FR)
     val xx2 = x(Range(w - 1 - 1, w - b - 2, -1), FR)
     val xx = new FloatProcessor(b + w + b, h)
-    val blitter = new FloatBlitter(xx)
-    blitter.copyBits(xx1, 0, 0, Blitter.COPY)
-    blitter.copyBits(x, b, 0, Blitter.COPY)
-    blitter.copyBits(xx2, b + w, 0, Blitter.COPY)
+    xx.copyBits(xx1, 0, 0, Blitter.COPY)
+    xx.copyBits(x, b, 0, Blitter.COPY)
+    xx.copyBits(xx2, b + w, 0, Blitter.COPY)
 
     xx
   }
@@ -973,10 +937,9 @@ object DDFAPD {
     val xx1 = x(FR, Range(1 + b - 1, 2 - 2, -1))
     val xx2 = x(FR, Range(h - 1 - 1, h - b - 2, -1))
     val xx = new FloatProcessor(w, b + h + b)
-    val blitter = new FloatBlitter(xx)
-    blitter.copyBits(xx1, 0, 0, Blitter.COPY)
-    blitter.copyBits(x, 0, b, Blitter.COPY)
-    blitter.copyBits(xx2, 0, b + h, Blitter.COPY)
+    xx.copyBits(xx1, 0, 0, Blitter.COPY)
+    xx.copyBits(x, 0, b, Blitter.COPY)
+    xx.copyBits(xx2, 0, b + h, Blitter.COPY)
 
     xx
   }

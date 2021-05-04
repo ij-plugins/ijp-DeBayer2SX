@@ -22,7 +22,7 @@
 
 package ij_plugins.debayer2sx
 
-import ij.process.ColorProcessor
+import ij.process.{ByteProcessor, ColorProcessor}
 import ij_plugins.debayer2sx.DeBayer2Config.{Demosaicing, MosaicOrder}
 import ij_plugins.debayer2sx.Utils._
 import org.scalatest.BeforeAndAfter
@@ -75,5 +75,18 @@ class DeBayer2Test extends AnyFlatSpec with Matchers with BeforeAndAfter {
     val (dstStack, bpp) = DeBayer2.process(bayBP, DeBayer2Config(MosaicOrder.R_G, Demosaicing.AdaptiveSmoothHue))
     val cp = DeBayer2.stackToColorProcessor(dstStack, bpp)
     assert(meanDistance(cp, refCP) <= meanDistanceTolerance * 3)
+  }
+
+  it should "should throw IllegalArgumentException for images with odd sizes" in {
+    val bp = new ByteProcessor(347, 440)
+    for (o <- MosaicOrder.values)
+      assertThrows[IllegalArgumentException] {
+        DeBayer2.process(bp, DeBayer2Config(mosaicOrder = o, demosaicing = Demosaicing.DDFAPD))
+      }
+
+    for (o <- MosaicOrder.values)
+      assertThrows[IllegalArgumentException] {
+        DeBayer2.process(bp, DeBayer2Config(o, Demosaicing.DDFAPDRefined))
+      }
   }
 }
