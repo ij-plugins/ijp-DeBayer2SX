@@ -32,7 +32,9 @@ val commonSettings = Seq(
     "-deprecation", 
     "-Xlint", 
     "-feature",
-    "-explaintypes", 
+    "-explaintypes",
+    "-release", "8",
+    "-target:8"
   ),
   Compile / doc / scalacOptions ++= Opts.doc.title("IJP Debayer2SX API"),
   Compile / doc / scalacOptions ++= Opts.doc.version(_version),
@@ -45,7 +47,7 @@ val commonSettings = Seq(
       case Some(path) => Seq("-diagrams", "-diagrams-dot-path", path, "-diagrams-debug")
       case None => Seq.empty[String]
     }),
-  javacOptions  ++= Seq("-deprecation", "-Xlint"),
+  Compile / compile / javacOptions ++= Seq("-deprecation", "-Xlint", "-source",  "1.8", "-target",  "1.8"),
   //
   libraryDependencies ++= Seq(
     "net.imagej"     % "ij"        % "1.53i",
