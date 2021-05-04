@@ -6,7 +6,7 @@ import java.net.URL
 
 name := "ijp-debayer2sx"
 
-val _version = "1.2.0.1-SNAPSHOT"
+val _version = "1.3.0"
 val _scalaVersions = Seq("2.13.5", "2.12.13")
 val _scalaVersion  = _scalaVersions.head
 
