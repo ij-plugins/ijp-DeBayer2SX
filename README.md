@@ -3,7 +3,7 @@
 
 [![Build Status](https://travis-ci.org/ij-plugins/ijp-DeBayer2SX.svg?branch=master)](https://travis-ci.org/ij-plugins/ijp-DeBayer2SX)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.sf.ij-plugins/ijp-debayer2sx-core_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.sf.ij-plugins/ijp-debayer2sx-core_2.13)
-[![Scaladoc](http://javadoc-badge.appspot.com/net.sf.ij-plugins/ijp-debayer2sx-core_2.13.svg?label=scaladoc)](http://javadoc-badge.appspot.com/net.sf.ij-plugins/ijp-debayer2sx-core_2.13)
+[![Scaladoc](https://javadoc.io/badge2/net.sf.ij-plugins/ijp-debayer2sx-core_2.13/scaladoc.svg)](https://javadoc.io/doc/net.sf.ij-plugins/ijp-debayer2sx-core_2.13)
 
 Demasaicing (Bayer patter reconstruction) algorithms implemented, all support 8 bit and 16 bit input:
 
