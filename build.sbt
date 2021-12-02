@@ -4,7 +4,7 @@ import java.net.URL
 
 name := "ijp-debayer2sx"
 
-ThisBuild / version := "1.3.1.1-SNAPSHOT"
+ThisBuild / version := "1.3.2"
 ThisBuild / organization := "net.sf.ij-plugins"
 ThisBuild / sonatypeProfileName := "net.sf.ij-plugins"
 ThisBuild / homepage := Some(new URL("https://github.com/ij-plugins/ijp-color"))

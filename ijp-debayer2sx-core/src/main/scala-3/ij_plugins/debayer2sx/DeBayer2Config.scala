@@ -27,25 +27,18 @@ import ij_plugins.debayer2sx.DeBayer2Config.{Demosaicing, MosaicOrder}
 object DeBayer2Config {
 
   /**
-    * Debayer algorithm type.
-    */
-  enum Demosaicing(val entryName: String)
-  {
+   * Debayer algorithm type.
+   */
+  enum Demosaicing(val entryName: String) {
     case Replication extends Demosaicing("Replication")
-    case Bilinear
-    extends Demosaicing("Bilinear")
-    case SmoothHue
-    extends Demosaicing("Smooth Hue")
-    case AdaptiveSmoothHue
-    extends Demosaicing("Adaptive Smooth Hue")
-    case DDFAPD
-    extends Demosaicing("DDFAPD without Refining")
-    case DDFAPDRefined
-    extends Demosaicing("DDFAPD with Refining")
+    case Bilinear extends Demosaicing("Bilinear")
+    case SmoothHue extends Demosaicing("Smooth Hue")
+    case AdaptiveSmoothHue extends Demosaicing("Adaptive Smooth Hue")
+    case DDFAPD extends Demosaicing("DDFAPD without Refining")
+    case DDFAPDRefined extends Demosaicing("DDFAPD with Refining")
 
     override def toString: String = entryName
-
-    def name: String = entryName
+    def name: String              = entryName
   }
 
   object Demosaicing {
@@ -58,9 +51,9 @@ object DeBayer2Config {
   }
 
   /**
-    * Order of filters in Bayer image.
-    * For instance B-G means that the first pixel in the first row is `B` the next one is `G`.
-    */
+   * Order of filters in Bayer image.
+   * For instance B-G means that the first pixel in the first row is `B` the next one is `G`.
+   */
   enum MosaicOrder(val entryName: String, val bayer1ID: Int) {
     case B_G extends MosaicOrder("B-G", 1)
     case G_B extends MosaicOrder("G-B", 3)
@@ -68,8 +61,7 @@ object DeBayer2Config {
     case R_G extends MosaicOrder("R-G", 0)
 
     override def toString: String = entryName
-
-    def name: String = entryName
+    def name: String              = entryName
   }
 
   object MosaicOrder {
