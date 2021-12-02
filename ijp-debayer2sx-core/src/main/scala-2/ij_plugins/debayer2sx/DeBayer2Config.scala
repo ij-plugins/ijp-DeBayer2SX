@@ -74,5 +74,4 @@ object DeBayer2Config {
 
 }
 
-case class DeBayer2Config(mosaicOrder: MosaicOrder = MosaicOrder.R_G,
-                          demosaicing: Demosaicing = Demosaicing.DDFAPD)
+case class DeBayer2Config(mosaicOrder: MosaicOrder = MosaicOrder.R_G, demosaicing: Demosaicing = Demosaicing.DDFAPD)

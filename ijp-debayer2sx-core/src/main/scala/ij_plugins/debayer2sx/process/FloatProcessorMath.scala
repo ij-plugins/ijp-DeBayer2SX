@@ -23,9 +23,9 @@
 package ij_plugins.debayer2sx.process
 
 import ij.process.{Blitter, FloatBlitter, FloatProcessor}
+import ij_plugins.debayer2sx.LoopUtils.slice
 
 import scala.language.implicitConversions
-
 
 object FloatProcessorMath {
 
@@ -133,34 +133,4 @@ final class FloatProcessorMath(val fp: FloatProcessor) {
     r
   }
 
-  @inline
-  private[this] def slice(src: FloatProcessor, srcRangeX: Range, srcRangeY: Range): FloatProcessor = {
-    import io.github.metarank.cfor._
-
-    // bay(1:2:m,2:2:n)
-    val _srcRangeX = if (srcRangeX == FR) Range(0, src.getWidth) else srcRangeX
-    val _srcRangeY = if (srcRangeY == FR) Range(0, src.getHeight) else srcRangeY
-
-    val (xStart, xEnd, xStep) = sortedRangeParams(_srcRangeX)
-    val (yStart, yEnd, yStep) = sortedRangeParams(_srcRangeY)
-
-    val srcWidth = src.getWidth
-    val srcPixels = src.getPixels.asInstanceOf[Array[Float]]
-
-    val dstWidth = _srcRangeX.length
-    val dstHeight = _srcRangeY.length
-    val dst = new FloatProcessor(dstWidth, dstHeight)
-    val dstPixels = dst.getPixels.asInstanceOf[Array[Float]]
-
-    cfor(yStart)(_ < yEnd, _ + yStep) { y =>
-      val srcOffsetY = y * srcWidth
-      val dstY = (y - _srcRangeY.start) / _srcRangeY.step
-      val dstOffsetY = dstY * dstWidth
-      cfor(xStart)(_ < xEnd, _ + xStep) { x =>
-        val dstX = (x - _srcRangeX.start) / _srcRangeX.step
-        dstPixels(dstX + dstOffsetY) = srcPixels(x + srcOffsetY)
-      }
-    }
-    dst
-  }
 }

@@ -34,7 +34,7 @@ object DeBayer2Plugin {
 
 class DeBayer2Plugin extends PlugIn {
 
-  import DeBayer2Plugin._
+  import DeBayer2Plugin.*
 
   private val Title = "DeBayer2"
   private val Description = "Convert a bayer pattern image to a color image."
@@ -45,8 +45,9 @@ class DeBayer2Plugin extends PlugIn {
   override def run(arg: String): Unit = {
     // We need an input image
     val imp = IJ.getImage
-    if (imp == null)
+    if (imp == null) {
       return
+    }
 
     // Check for supported types
     imp.getType match {
@@ -79,11 +80,12 @@ class DeBayer2Plugin extends PlugIn {
         val cp = DeBayer2.stackToColorProcessor(stack, bpp)
         new ImagePlus(dstTitle, cp)
       case ImagePlus.GRAY16 =>
-        val ss = if (stack.getBitDepth == 16) {
-          stack
-        } else {
-          DeBayer2.stackToShortStack(stack, bpp, bpp)
-        }
+        val ss =
+          if (stack.getBitDepth == 16) {
+            stack
+          } else {
+            DeBayer2.stackToShortStack(stack, bpp, bpp)
+          }
         val imp1 = new ImagePlus(dstTitle, ss)
         new CompositeImage(imp1, CompositeImage.COMPOSITE)
       case _ =>

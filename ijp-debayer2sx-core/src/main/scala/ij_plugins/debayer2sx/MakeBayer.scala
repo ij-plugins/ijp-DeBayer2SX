@@ -25,7 +25,7 @@ package ij_plugins.debayer2sx
 import ij.ImageStack
 import ij.process.{ByteProcessor, ColorProcessor, FloatProcessor, ImageProcessor}
 import ij_plugins.debayer2sx.DeBayer2Config.MosaicOrder
-import ij_plugins.debayer2sx.process.copyRanges
+import ij_plugins.debayer2sx.LoopUtils.copyRanges
 
 /**
   * Create Bayer images from color images. This is mostly useful for testing and demos.
@@ -53,7 +53,6 @@ object MakeBayer {
     stack.setColorModel(cp.getDefaultColorModel)
     stack
   }
-
 
   /**
     * Encode color image in a Bayer pattern.
