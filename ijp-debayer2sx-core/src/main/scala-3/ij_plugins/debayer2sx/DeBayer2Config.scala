@@ -24,30 +24,37 @@ package ij_plugins.debayer2sx
 
 import ij_plugins.debayer2sx.DeBayer2Config.{Demosaicing, MosaicOrder}
 
-import scala.collection.immutable
-
 object DeBayer2Config {
 
   /**
     * Debayer algorithm type.
     */
-  enum Demosaicing(val entryName: String) {
+  enum Demosaicing(val entryName: String)
+  {
+    case Replication extends Demosaicing("Replication")
+    case Bilinear
+    extends Demosaicing("Bilinear")
+    case SmoothHue
+    extends Demosaicing("Smooth Hue")
+    case AdaptiveSmoothHue
+    extends Demosaicing("Adaptive Smooth Hue")
+    case DDFAPD
+    extends Demosaicing("DDFAPD without Refining")
+    case DDFAPDRefined
+    extends Demosaicing("DDFAPD with Refining")
+
     override def toString: String = entryName
 
-    case Replication extends Demosaicing("Replication")
-    case Bilinear extends Demosaicing("Bilinear")
-    case SmoothHue extends Demosaicing("Smooth Hue")
-    case AdaptiveSmoothHue extends Demosaicing("Adaptive Smooth Hue")
-    case DDFAPD extends Demosaicing("DDFAPD without Refining")
-    case DDFAPDRefined extends Demosaicing("DDFAPD with Refining")
+    def name: String = entryName
   }
 
   object Demosaicing {
     val names: Array[String] = values.map(_.entryName).toArray
 
-    def withName(name: String): Demosaicing = Demosaicing.valueOf(name)
+    def withName(name: String): Demosaicing =
+      withNameOption(name).getOrElse(throw new NoSuchElementException(s"No MappingMethod with name: $name"))
 
-    def withNameOption(name: String): Option[Demosaicing] = Option(Demosaicing.valueOf(name))
+    def withNameOption(name: String): Option[Demosaicing] = Demosaicing.values.find(_.name == name)
   }
 
   /**
@@ -61,14 +68,17 @@ object DeBayer2Config {
     case R_G extends MosaicOrder("R-G", 0)
 
     override def toString: String = entryName
+
+    def name: String = entryName
   }
 
   object MosaicOrder {
     val names: Array[String] = values.map(_.entryName).toArray
 
-    def withName(name: String): MosaicOrder = MosaicOrder.valueOf(name)
+    def withName(name: String): MosaicOrder =
+      withNameOption(name).getOrElse(throw new NoSuchElementException(s"No MappingMethod with name: $name"))
 
-    def withNameOption(name: String): Option[MosaicOrder] = Option(MosaicOrder.valueOf(name))
+    def withNameOption(name: String): Option[MosaicOrder] = MosaicOrder.values.find(_.name == name)
   }
 
 }
