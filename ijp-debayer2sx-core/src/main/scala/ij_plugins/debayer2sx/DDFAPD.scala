@@ -24,8 +24,9 @@ package ij_plugins.debayer2sx
 
 import ij.ImageStack
 import ij.plugin.filter.Convolver
-import ij.process._
-import ij_plugins.debayer2sx.process.{FR, add, copyRanges, _}
+import ij.process.*
+import ij_plugins.debayer2sx.LoopUtils.{checkImg, copyRanges, crop}
+import ij_plugins.debayer2sx.process.{FR, add, *}
 
 import java.awt.Rectangle
 
@@ -39,7 +40,6 @@ import java.awt.Rectangle
 object DDFAPD {
 
   // Parts of the implementation is based on the reference MATLAB code by Daniele Menon.
-
 
   /**
     * Convert Bayer encoded image to to stack of color bands (red, green, blue).
@@ -58,7 +58,6 @@ object DDFAPD {
 
     cp
   }
-
 
   /**
     * Convert Bayer encoded image to to stack of color bands (red, green, blue).
@@ -112,7 +111,8 @@ object DDFAPD {
     //
     // out=ddfapd_refining(out,interpDir);
     // out=check_img(out,bpp);
-    val (r, g, b) = if (doRefine) {
+    val (r, g, b) =
+    if (doRefine) {
       val r4 = refining(outR, outG, outB, interpDir)
       val outRRefined = r4._1
       val outGRefined = r4._2
@@ -133,7 +133,6 @@ object DDFAPD {
 
     stack
   }
-
 
   /**
     * Directional interpolation of the green channel.
@@ -164,16 +163,24 @@ object DDFAPD {
       // G0(:,1:2:n)=bay(1:2:m,1:2:n);
       val G0 = new FloatProcessor(w, h / 2)
       copyRanges(
-        G0, Range(0, w, 2), Range(0, h / 2),
-        bay, Range(0, w, 2), Range(0, h, 2)
+        G0,
+        Range(0, w, 2),
+        Range(0, h / 2),
+        bay,
+        Range(0, w, 2),
+        Range(0, h, 2)
       )
 
       // R1=zeros(m/2,n);
       // R1(:,2:2:n)=bay(1:2:m,2:2:n);
       val R1 = new FloatProcessor(w, h / 2)
       copyRanges(
-        R1, Range(1, w, 2), Range(0, h / 2),
-        bay, Range(1, w, 2), Range(0, h, 2)
+        R1,
+        Range(1, w, 2),
+        Range(0, h / 2),
+        bay,
+        Range(1, w, 2),
+        Range(0, h, 2)
       )
 
       // f1=filtImg(h1+[0 0 1 0 0],G0,1);
@@ -272,88 +279,35 @@ object DDFAPD {
     //    B = (length(h)-1)/2;
     val B = (hh.length - 1) / 2
 
-    val y = if (dir == 1) {
-      // Add mirroring of the borders
-      // xx = [x(:,1+B:-1:2), x, x(:,n-1:-1:n-B)];
-      val xx = mirrorBorderWidth(x, B)
+    val y =
+      if (dir == 1) {
+        // Add mirroring of the borders
+        // xx = [x(:,1+B:-1:2), x, x(:,n-1:-1:n-B)];
+        val xx = mirrorBorderWidth(x, B)
 
-      //    y=conv2(1,h,xx,'valid');
-      new Convolver().convolveFloat1D(xx, hh, hh.length, 1, 1)
-      val cropROI = new Rectangle(B, 0, w, h)
-      //      xx.setRoi(cropROI)
-      //      xx.crop().asInstanceOf[FloatProcessor]
-      crop(xx, cropROI)
-    } else if (dir == 2) {
-      // Add mirroring of the borders
-      // xx = [x(1+B:-1:2,:); x; x(m-1:-1:m-B,:)];
-      val xx = mirrorBorderHeight(x: FloatProcessor, B)
+        //    y=conv2(1,h,xx,'valid');
+        new Convolver().convolveFloat1D(xx, hh, hh.length, 1, 1)
+        val cropROI = new Rectangle(B, 0, w, h)
+        //      xx.setRoi(cropROI)
+        //      xx.crop().asInstanceOf[FloatProcessor]
+        crop(xx, cropROI)
+      } else if (dir == 2) {
+        // Add mirroring of the borders
+        // xx = [x(1+B:-1:2,:); x; x(m-1:-1:m-B,:)];
+        val xx = mirrorBorderHeight(x: FloatProcessor, B)
 
-      // y=conv2(h,1,xx,'valid');
-      new Convolver().convolveFloat1D(xx, hh, 1, hh.length, 1)
-      val cropROI = new Rectangle(0, B, w, h)
-      //      xx.setRoi(cropROI)
-      //      xx.crop().asInstanceOf[FloatProcessor]
-      crop(xx, cropROI)
-    } else {
-      throw new IllegalArgumentException("Invalid `dir` value:" + dir)
-    }
+        // y=conv2(h,1,xx,'valid');
+        new Convolver().convolveFloat1D(xx, hh, 1, hh.length, 1)
+        val cropROI = new Rectangle(0, B, w, h)
+        //      xx.setRoi(cropROI)
+        //      xx.crop().asInstanceOf[FloatProcessor]
+        crop(xx, cropROI)
+      } else {
+        throw new IllegalArgumentException("Invalid `dir` value:" + dir)
+      }
 
     y
   }
-
-  private[this] def crop(src: FloatProcessor, roi: Rectangle): FloatProcessor = {
-    import io.github.metarank.cfor._
-
-    val width = src.getWidth
-    val pixels = src.getPixels.asInstanceOf[Array[Float]]
-    val roiX = roi.x
-    val roiY = roi.y
-    val roiWidth = roi.width
-    val roiHeight = roi.height
-    val ip2 = new FloatProcessor(roiWidth, roiHeight)
-    val pixels2 = ip2.getPixels.asInstanceOf[Array[Float]]
-    //    for (ys <- roiY until roiY + roiHeight) {
-    cfor(roiY)(_ < roiY + roiHeight, _ + 1) { ys =>
-      var offset1 = (ys - roiY) * roiWidth
-      var offset2 = ys * width + roiX
-      //      for (xs <- 0 until roiWidth) {
-      cfor(0)(_ < roiWidth, _ + 1) { _ =>
-        pixels2(offset1) = pixels(offset2)
-        offset1 += 1
-        offset2 += 1
-      }
-    }
-    ip2
-  }
-
-  /**
-    * Clip values in the image to the range specified by `bpp`.
-    *
-    * {{{
-    *   min = 0
-    *   max = 2^bpp - 1
-    * }}}
-    *
-    * @param ip  image to check
-    * @param bpp bits per pixel
-    */
-  private[this] def checkImg(ip: FloatProcessor, bpp: Int): Unit = {
-    import io.github.metarank.cfor._
-
-    val maxVal = (math.pow(2, bpp) - 1).toFloat
-    val pixels = ip.getPixels.asInstanceOf[Array[Float]]
-
-    //    for (i <- pixels.indices) {
-    cfor(0)(_ < pixels.length, _ + 1) { i =>
-      val v = pixels(i)
-      if (v > maxVal) {
-        pixels(i) = maxVal
-      } else if (v < 0) {
-        pixels(i) = 0
-      }
-    }
-  }
-
 
   /**
     * The absolute norm between two values.
@@ -381,7 +335,11 @@ object DDFAPD {
     *         and if interpDir(i,j)==0 no estimation was performed (for the G positions)
     *         *
     */
-  private[debayer2sx] def decision(Gh: FloatProcessor, Gv: FloatProcessor, bay: FloatProcessor): (FloatProcessor, ByteProcessor) = {
+  private[debayer2sx] def decision(
+                                    Gh: FloatProcessor,
+                                    Gv: FloatProcessor,
+                                    bay: FloatProcessor
+                                  ): (FloatProcessor, ByteProcessor) = {
     val h = Gh.getHeight
     val w = Gh.getWidth
     val hh = h - 2
@@ -477,9 +435,15 @@ object DDFAPD {
     {
       val y = Range(3 - 1, hh, 2)
       val x = Range(4 - 1, ww, 2)
-      val vh = DH(x - 2, y - 2) + DH(x, y - 2) + DH(x - 2, y) * c + DH(x, y) * c + DH(x - 2, y + 2) + DH(x, y + 2) + DH(x - 1, y - 1) + DH(x - 1, y + 1)
+      val vh = DH(x - 2, y - 2) + DH(x, y - 2) + DH(x - 2, y) * c + DH(x, y) * c + DH(x - 2, y + 2) + DH(x, y + 2) + DH(
+        x - 1,
+        y - 1
+      ) + DH(x - 1, y + 1)
       copyRanges(DeltaH, x, y, vh, FR, FR)
-      val vv = DV(x - 2, y - 2) + DV(x, y - 2) * c + DV(x + 2, y - 2) + DV(x - 2, y) + DV(x, y) * c + DV(x + 2, y) + DV(x - 1, y - 1) + DV(x + 1, y - 1)
+      val vv = DV(x - 2, y - 2) + DV(x, y - 2) * c + DV(x + 2, y - 2) + DV(x - 2, y) + DV(x, y) * c + DV(x + 2, y) + DV(
+        x - 1,
+        y - 1
+      ) + DV(x + 1, y - 1)
       copyRanges(DeltaV, x, y, vv, FR, FR)
     }
 
@@ -490,9 +454,15 @@ object DDFAPD {
     {
       val y = Range(4 - 1, hh, 2)
       val x = Range(3 - 1, ww, 2)
-      val vh = DH(x - 2, y - 2) + DH(x, y - 2) + DH(x - 2, y) * c + DH(x, y) * c + DH(x - 2, y + 2) + DH(x, y + 2) + DH(x - 1, y - 1) + DH(x - 1, y + 1)
+      val vh = DH(x - 2, y - 2) + DH(x, y - 2) + DH(x - 2, y) * c + DH(x, y) * c + DH(x - 2, y + 2) + DH(x, y + 2) + DH(
+        x - 1,
+        y - 1
+      ) + DH(x - 1, y + 1)
       copyRanges(DeltaH, x, y, vh, FR, FR)
-      val vv = DV(x - 2, y - 2) + DV(x, y - 2) * c + DV(x + 2, y - 2) + DV(x - 2, y) + DV(x, y) * c + DV(x + 2, y) + DV(x - 1, y - 1) + DV(x + 1, y - 1)
+      val vv = DV(x - 2, y - 2) + DV(x, y - 2) * c + DV(x + 2, y - 2) + DV(x - 2, y) + DV(x, y) * c + DV(x + 2, y) + DV(
+        x - 1,
+        y - 1
+      ) + DV(x + 1, y - 1)
       copyRanges(DeltaV, x, y, vv, FR, FR)
     }
 
@@ -504,9 +474,15 @@ object DDFAPD {
     {
       val y = Range(2 - 1, 2)
       val x = Range(3 - 1, ww, 2)
-      val vh = DH(x - 2, y + 2) + DH(x, y + 2) + DH(x - 2, y) * c + DH(x, y) * c + DH(x - 2, y + 2) + DH(x, y + 2) + DH(x - 1, y - 1) + DH(x - 1, y + 1)
+      val vh = DH(x - 2, y + 2) + DH(x, y + 2) + DH(x - 2, y) * c + DH(x, y) * c + DH(x - 2, y + 2) + DH(x, y + 2) + DH(
+        x - 1,
+        y - 1
+      ) + DH(x - 1, y + 1)
       copyRanges(DeltaH, x, y, vh, FR, FR)
-      val vv = DV(x - 2, y + 2) + DV(x, y + 2) * c + DV(x + 2, y + 2) + DV(x - 2, y) + DV(x, y) * c + DV(x + 2, y) + DV(x - 1, y - 1) + DV(x + 1, y - 1)
+      val vv = DV(x - 2, y + 2) + DV(x, y + 2) * c + DV(x + 2, y + 2) + DV(x - 2, y) + DV(x, y) * c + DV(x + 2, y) + DV(
+        x - 1,
+        y - 1
+      ) + DV(x + 1, y - 1)
       copyRanges(DeltaV, x, y, vv, FR, FR)
     }
 
@@ -517,9 +493,15 @@ object DDFAPD {
     {
       val y = Range(h - 1 - 1, h - 1)
       val x = Range(4 - 1, ww, 2)
-      val vh = DH(x - 2, y - 2) + DH(x, y - 2) + DH(x - 2, y) * c + DH(x, y) * c + DH(x - 2, y - 2) + DH(x, y - 2) + DH(x - 1, y - 1) + DH(x - 1, y + 1)
+      val vh = DH(x - 2, y - 2) + DH(x, y - 2) + DH(x - 2, y) * c + DH(x, y) * c + DH(x - 2, y - 2) + DH(x, y - 2) + DH(
+        x - 1,
+        y - 1
+      ) + DH(x - 1, y + 1)
       copyRanges(DeltaH, x, y, vh, FR, FR)
-      val vv = DV(x - 2, y - 2) + DV(x, y - 2) * c + DV(x + 2, y - 2) + DV(x - 2, y) + DV(x, y) * c + DV(x + 2, y) + DV(x - 1, y - 1) + DV(x + 1, y - 1)
+      val vv = DV(x - 2, y - 2) + DV(x, y - 2) * c + DV(x + 2, y - 2) + DV(x - 2, y) + DV(x, y) * c + DV(x + 2, y) + DV(
+        x - 1,
+        y - 1
+      ) + DV(x + 1, y - 1)
       copyRanges(DeltaV, x, y, vv, FR, FR)
     }
 
@@ -530,9 +512,15 @@ object DDFAPD {
     {
       val y = Range(2 - 1, 2)
       val x = Range(3 - 1, hh, 2)
-      val vh = DH(y + 2, x - 2) + DH(y, x - 2) + DH(y + 2, x) * c + DH(y, x) * c + DH(y + 2, x + 2) + DH(y, x + 2) + DH(y - 1, x - 1) + DH(y - 1, x + 1)
+      val vh = DH(y + 2, x - 2) + DH(y, x - 2) + DH(y + 2, x) * c + DH(y, x) * c + DH(y + 2, x + 2) + DH(y, x + 2) + DH(
+        y - 1,
+        x - 1
+      ) + DH(y - 1, x + 1)
       copyRanges(DeltaH, y, x, vh, FR, FR)
-      val vv = DV(y + 2, x - 2) + DV(y, x - 2) * c + DV(y + 2, x - 2) + DV(y + 2, x) + DV(y, x) * c + DV(y + 2, x) + DV(y - 1, x - 1) + DV(y + 1, x - 1)
+      val vv = DV(y + 2, x - 2) + DV(y, x - 2) * c + DV(y + 2, x - 2) + DV(y + 2, x) + DV(y, x) * c + DV(y + 2, x) + DV(
+        y - 1,
+        x - 1
+      ) + DV(y + 1, x - 1)
       copyRanges(DeltaV, y, x, vv, FR, FR)
     }
 
@@ -543,9 +531,15 @@ object DDFAPD {
     {
       val y = Range(w - 1 - 1, w - 1)
       val x = Range(4 - 1, hh, 2)
-      val vh = DH(y - 2, x - 2) + DH(y, x - 2) + DH(y - 2, x) * c + DH(y, x) * c + DH(y - 2, x + 2) + DH(y, x + 2) + DH(y - 1, x - 1) + DH(y - 1, x + 1)
+      val vh = DH(y - 2, x - 2) + DH(y, x - 2) + DH(y - 2, x) * c + DH(y, x) * c + DH(y - 2, x + 2) + DH(y, x + 2) + DH(
+        y - 1,
+        x - 1
+      ) + DH(y - 1, x + 1)
       copyRanges(DeltaH, y, x, vh, FR, FR)
-      val vv = DV(y - 2, x - 2) + DV(y, x - 2) * c + DV(y - 2, x - 2) + DV(y - 2, x) + DV(y, x) * c + DV(y - 2, x) + DV(y - 1, x - 1) + DV(y + 1, x - 1)
+      val vv = DV(y - 2, x - 2) + DV(y, x - 2) * c + DV(y - 2, x - 2) + DV(y - 2, x) + DV(y, x) * c + DV(y - 2, x) + DV(
+        y - 1,
+        x - 1
+      ) + DV(y + 1, x - 1)
       copyRanges(DeltaV, y, x, vv, FR, FR)
     }
 
@@ -572,7 +566,6 @@ object DDFAPD {
       }
     }
 
-
     // Reconstruction near the border of the image
     // outG(1,:)=Gh(1,:);
     copyRanges(dstG, FR, Range(0, 1), Gh, FR, Range(0, 1))
@@ -590,7 +583,14 @@ object DDFAPD {
     // outG(2,n-1)=Gh(2,n-1);
     copyRanges(dstG, Range(w - 1 - 1, w - 1), Range(1, 2), Gh, Range(w - 1 - 1, w - 1), Range(1, 2))
     // outG(m-1,n-1)=Gh(m-1,n-1);
-    copyRanges(dstG, Range(w - 1 - 1, w - 1), Range(h - 1 - 1, h - 1), Gh, Range(w - 1 - 1, w - 1), Range(h - 1 - 1, h - 1))
+    copyRanges(
+      dstG,
+      Range(w - 1 - 1, w - 1),
+      Range(h - 1 - 1, h - 1),
+      Gh,
+      Range(w - 1 - 1, w - 1),
+      Range(h - 1 - 1, h - 1)
+    )
 
     (dstG, interpDir)
   }
@@ -606,7 +606,11 @@ object DDFAPD {
     * @param interpDir best interpolation direction
     * @return Reconstructed channels red and blue.
     */
-  private[debayer2sx] def interpRB(bay: FloatProcessor, G: FloatProcessor, interpDir: ByteProcessor): (FloatProcessor, FloatProcessor) = {
+  private[debayer2sx] def interpRB(
+                                    bay: FloatProcessor,
+                                    G: FloatProcessor,
+                                    interpDir: ByteProcessor
+                                  ): (FloatProcessor, FloatProcessor) = {
     val h = G.getHeight
     val w = G.getWidth
 
@@ -712,14 +716,17 @@ object DDFAPD {
     for (y <- Range(1, h - 1, 2)) {
       for (x <- Range(2, w - 1, 2)) {
         if (interpDir.get(x, y) == 1) {
-          R.setf(x, y, B.getf(x, y) + 1 / 2f * (R.getf(x - 1, y) - B.getf(x - 1, y) + R.getf(x + 1, y) - B.getf(x + 1, y)))
+          R.setf(
+            x,
+            y,
+            B.getf(x, y) + 1 / 2f * (R.getf(x - 1, y) - B.getf(x - 1, y) + R.getf(x + 1, y) - B.getf(x + 1, y))
+          )
         } else {
           val v = B.getf(x, y) + 1 / 2f * (R.getf(x, y - 1) - B.getf(x, y - 1) + R.getf(x, y + 1) - B.getf(x, y + 1))
           R.setf(x, y, v)
         }
       }
     }
-
 
     // for i=3:2:m-1,
     //   for j=2:2:n-2,
@@ -733,9 +740,17 @@ object DDFAPD {
     for (y <- Range(2, h - 1, 2)) {
       for (x <- Range(1, w - 2, 2)) {
         if (interpDir.get(x, y) == 1) {
-          B.setf(x, y, R.getf(x, y) + 1 / 2f * (B.getf(x - 1, y) - R.getf(x - 1, y) + B.getf(x + 1, y) - R.getf(x + 1, y)))
+          B.setf(
+            x,
+            y,
+            R.getf(x, y) + 1 / 2f * (B.getf(x - 1, y) - R.getf(x - 1, y) + B.getf(x + 1, y) - R.getf(x + 1, y))
+          )
         } else {
-          B.setf(x, y, R.getf(x, y) + 1 / 2f * (B.getf(x, y - 1) - R.getf(x, y - 1) + B.getf(x, y + 1) - R.getf(x, y + 1)))
+          B.setf(
+            x,
+            y,
+            R.getf(x, y) + 1 / 2f * (B.getf(x, y - 1) - R.getf(x, y - 1) + B.getf(x, y + 1) - R.getf(x, y + 1))
+          )
         }
       }
     }
@@ -755,7 +770,12 @@ object DDFAPD {
     * @param interpDir optimal interpolation direction
     * @return bands of the reconstructed image
     */
-  def refining(R: FloatProcessor, G: FloatProcessor, B: FloatProcessor, interpDir: ByteProcessor): (FloatProcessor, FloatProcessor, FloatProcessor) = {
+  def refining(
+                R: FloatProcessor,
+                G: FloatProcessor,
+                B: FloatProcessor,
+                interpDir: ByteProcessor
+              ): (FloatProcessor, FloatProcessor, FloatProcessor) = {
     val h = R.getHeight
     val w = R.getWidth
 
@@ -766,7 +786,6 @@ object DDFAPD {
     val medBlessG = new FloatProcessor(w, h)
     val medRlessB = new FloatProcessor(w, h)
 
-
     // ff=[1 1 1]/3;
     val ff = 1 / 3f
 
@@ -775,7 +794,6 @@ object DDFAPD {
       // BlessG=B-G;
       val RlessG = R - G
       val BlessG = B - G
-
 
       // Refining of the green
       // for i=2:2:m-1
@@ -789,13 +807,14 @@ object DDFAPD {
       // end
       for (y <- 2 - 1 until h - 1 by 2) {
         for (x <- 3 - 1 until w - 1 by 2) {
-          val v = if (interpDir.get(x, y) == 1) {
-            // medBlessG(i,j)=ff*BlessG(i,j-1:j+1).';
-            ff * (BlessG.getf(x - 1, y) + BlessG.getf(x, y) + BlessG.getf(x + 1, y))
-          } else {
-            // medBlessG(i,j)=ff*BlessG(i-1:i+1,j);
-            ff * (BlessG.getf(x, y - 1) + BlessG.getf(x, y) + BlessG.getf(x, y + 1))
-          }
+          val v =
+            if (interpDir.get(x, y) == 1) {
+              // medBlessG(i,j)=ff*BlessG(i,j-1:j+1).';
+              ff * (BlessG.getf(x - 1, y) + BlessG.getf(x, y) + BlessG.getf(x + 1, y))
+            } else {
+              // medBlessG(i,j)=ff*BlessG(i-1:i+1,j);
+              ff * (BlessG.getf(x, y - 1) + BlessG.getf(x, y) + BlessG.getf(x, y + 1))
+            }
           medBlessG.setf(x, y, v)
         }
       }
@@ -810,26 +829,29 @@ object DDFAPD {
       // end
       for (y <- 3 - 1 until h - 1 by 2) {
         for (x <- 2 - 1 until w - 1 by 2) {
-          val v = if (interpDir.get(x, y) == 1) {
-            // medRlessG(i,j)=ff*RlessG(i,j-1:j+1).';
-            ff * (RlessG.getf(x - 1, y) + RlessG.getf(x, y) + RlessG.getf(x + 1, y))
-          } else {
-            // medRlessG(i,j)=ff*RlessG(i-1:i+1,j);
-            ff * (RlessG.getf(x, y - 1) + RlessG.getf(x, y) + RlessG.getf(x, y + 1))
-          }
+          val v =
+            if (interpDir.get(x, y) == 1) {
+              // medRlessG(i,j)=ff*RlessG(i,j-1:j+1).';
+              ff * (RlessG.getf(x - 1, y) + RlessG.getf(x, y) + RlessG.getf(x + 1, y))
+            } else {
+              // medRlessG(i,j)=ff*RlessG(i-1:i+1,j);
+              ff * (RlessG.getf(x, y - 1) + RlessG.getf(x, y) + RlessG.getf(x, y + 1))
+            }
           medRlessG.setf(x, y, v)
         }
       }
 
       // G(3:2:m-1,2:2:n-1)=R(3:2:m-1,2:2:n-1)-medRlessG(3:2:m-1,2:2:n-1);
       {
-        val v = R(Range(2 - 1, w - 1, 2), Range(3 - 1, h - 1, 2)) - medRlessG(Range(2 - 1, w - 1, 2), Range(3 - 1, h - 1, 2))
+        val v =
+          R(Range(2 - 1, w - 1, 2), Range(3 - 1, h - 1, 2)) - medRlessG(Range(2 - 1, w - 1, 2), Range(3 - 1, h - 1, 2))
         copyRanges(G, Range(2 - 1, w - 1, 2), Range(3 - 1, h - 1, 2), v, FR, FR)
       }
 
       // G(2:2:m-1,3:2:n-1)=B(2:2:m-1,3:2:n-1)-medBlessG(2:2:m-1,3:2:n-1);
       {
-        val v = B(Range(3 - 1, w - 1, 2), Range(2 - 1, h - 1, 2)) - medBlessG(Range(3 - 1, w - 1, 2), Range(2 - 1, h - 1, 2))
+        val v =
+          B(Range(3 - 1, w - 1, 2), Range(2 - 1, h - 1, 2)) - medBlessG(Range(3 - 1, w - 1, 2), Range(2 - 1, h - 1, 2))
         copyRanges(G, Range(3 - 1, w - 1, 2), Range(2 - 1, h - 1, 2), v, FR, FR)
       }
     }
@@ -904,20 +926,20 @@ object DDFAPD {
     // end
     for (y <- 2 - 1 until h - 1 by 2) {
       for (x <- 3 - 1 until w - 1 by 2) {
-        val v = if (interpDir.get(x, y) == 1) {
-          // medRlessB(i,j)=ff*RlessB(i,j-1:j+1).';
-          ff * (RlessB.getf(x - 1, y) + RlessB.getf(x, y) + RlessB.getf(x + 1, y))
-        } else {
-          // medRlessB(i,j)=ff*RlessB(i-1:i+1,j);
-          ff * (RlessB.getf(x, y - 1) + RlessB.getf(x, y) + RlessB.getf(x, y + 1))
-        }
+        val v =
+          if (interpDir.get(x, y) == 1) {
+            // medRlessB(i,j)=ff*RlessB(i,j-1:j+1).';
+            ff * (RlessB.getf(x - 1, y) + RlessB.getf(x, y) + RlessB.getf(x + 1, y))
+          } else {
+            // medRlessB(i,j)=ff*RlessB(i-1:i+1,j);
+            ff * (RlessB.getf(x, y - 1) + RlessB.getf(x, y) + RlessB.getf(x, y + 1))
+          }
         medRlessB.setf(x, y, v)
 
         // R(i,j)=B(i,j)+medRlessB(i,j);
         R.setf(x, y, B.getf(x, y) + medRlessB.getf(x, y))
       }
     }
-
 
     //  Refining of the blue in the red pixels
     //  for i=3:2:m-1,
@@ -932,13 +954,14 @@ object DDFAPD {
     //  end
     for (y <- 3 - 1 until h - 1 by 2) {
       for (x <- 2 - 1 until w - 2 by 2) {
-        val v = if (interpDir.get(x, y) == 1) {
-          // medRlessB(i,j)=ff*RlessB(i,j-1:j+1).';
-          ff * (RlessB.getf(x - 1, y) + RlessB.getf(x, y) + RlessB.getf(x + 1, y))
-        } else {
-          // medRlessB(i,j)=ff*RlessB(i-1:i+1,j);
-          ff * (RlessB.getf(x, y - 1) + RlessB.getf(x, y) + RlessB.getf(x, y + 1))
-        }
+        val v =
+          if (interpDir.get(x, y) == 1) {
+            // medRlessB(i,j)=ff*RlessB(i,j-1:j+1).';
+            ff * (RlessB.getf(x - 1, y) + RlessB.getf(x, y) + RlessB.getf(x + 1, y))
+          } else {
+            // medRlessB(i,j)=ff*RlessB(i-1:i+1,j);
+            ff * (RlessB.getf(x, y - 1) + RlessB.getf(x, y) + RlessB.getf(x, y + 1))
+          }
         medRlessB.setf(x, y, v)
 
         // B(i,j)=R(i,j)-medRlessB(i,j);

@@ -23,10 +23,9 @@
 package ij_plugins
 
 import ij.process.{ByteProcessor, ColorProcessor, FloatProcessor}
-import ij_plugins.debayer2sx.process._
+import ij_plugins.debayer2sx.LoopUtils.copyRanges
 
 package object debayer2sx {
-
 
   /**
     * The trivial reconstruction algorithm that simply copies values to corresponding band,

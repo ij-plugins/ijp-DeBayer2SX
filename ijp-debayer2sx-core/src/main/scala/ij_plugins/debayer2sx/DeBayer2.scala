@@ -23,10 +23,11 @@
 package ij_plugins.debayer2sx
 
 import ij.ImageStack
-import ij.process._
+import ij.process.*
 import ij_plugins.debayer2sx.DDFAPD.debayerGR
 import ij_plugins.debayer2sx.DeBayer2Config.{Demosaicing, MosaicOrder}
-import ij_plugins.debayer2sx.process.{FR, copyRanges}
+import ij_plugins.debayer2sx.LoopUtils.copyRanges
+import ij_plugins.debayer2sx.process.FR
 
 object DeBayer2 {
 
@@ -59,8 +60,8 @@ object DeBayer2 {
         debayerDDFAPD(ip.convertToFloatProcessor(), bbp, doRefine = false, config.mosaicOrder)
       case Demosaicing.DDFAPDRefined =>
         debayerDDFAPD(ip.convertToFloatProcessor(), bbp, doRefine = true, config.mosaicOrder)
-      case x =>
-        throw new UnsupportedOperationException("Unsupported demosaicing type: " + x)
+      case null =>
+        throw new UnsupportedOperationException("config.demosaicing cannot be null")
     }
 
     stack.setSliceLabel("Red", 1)
@@ -120,7 +121,6 @@ object DeBayer2 {
 
     dst
   }
-
 
   private def debayerDDFAPD(src: FloatProcessor, bbp: Int, doRefine: Boolean, order: MosaicOrder): ImageStack = {
 
@@ -183,6 +183,5 @@ object DeBayer2 {
     }
 
   }
-
 
 }
