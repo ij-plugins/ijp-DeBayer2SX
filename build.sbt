@@ -11,8 +11,8 @@ ThisBuild / homepage := Some(new URL("https://github.com/ij-plugins/ijp-color"))
 ThisBuild / startYear := Some(2002)
 ThisBuild / licenses := Seq(("LGPL-2.1", new URL("http://opensource.org/licenses/LGPL-2.1")))
 
-ThisBuild / scalaVersion := "2.13.7"
-ThisBuild / crossScalaVersions := Seq("2.13.7", "2.12.15", "3.0.2")
+ThisBuild / scalaVersion := "2.13.8"
+ThisBuild / crossScalaVersions := Seq("2.13.8", "2.12.15", "3.0.2")
 
 publishArtifact := false
 publish / skip := true
