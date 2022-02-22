@@ -66,7 +66,7 @@ val commonSettings = Seq(
       case None => Seq.empty[String]
     }
     ),
-  Compile / compile / javacOptions ++= Seq("-deprecation", "-Xlint", "-source", "1.8", "-target", "1.8"),
+  Compile / compile / javacOptions ++= Seq("-deprecation", "-Xlint", "--release", "8"),
   //
   libraryDependencies ++= Seq(
     "net.imagej" % "ij" % "1.53i",
