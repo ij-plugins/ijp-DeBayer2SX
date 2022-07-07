@@ -8,3 +8,4 @@ target
 sandbox
 /null/
 tmp/
+.DS_Store
