@@ -105,7 +105,7 @@ lazy val ijp_debayer2sx_core = project.in(file("ijp-debayer2sx-core"))
     libraryDependencies ++= {
       if (isScala2(scalaVersion.value)) {
         Seq(
-          "com.beachape" %% "enumeratum" % "1.6.1",
+          "com.beachape" %% "enumeratum" % "1.7.0",
           "io.github.metarank" %% "cfor" % "0.2"
         )
       } else {
