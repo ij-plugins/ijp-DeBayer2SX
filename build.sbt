@@ -74,6 +74,8 @@ val commonSettings = Seq(
   ),
   resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
   //
+  exportJars := true,
+  //
   autoCompilerPlugins := true,
   // Fork a new JVM for 'run' and 'test:run'
   fork := true,
