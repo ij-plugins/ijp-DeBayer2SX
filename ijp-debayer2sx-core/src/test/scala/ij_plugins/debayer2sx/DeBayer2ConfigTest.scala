@@ -35,8 +35,6 @@ class DeBayer2ConfigTest extends AnyFlatSpec {
 
   "Demosaicing" should "lookup by name" in {
     for (v <- Demosaicing.values) {
-      println(s"v: '$v', entryName: '${v.entryName}'")
-
       Demosaicing.withName(v.entryName) should be(v)
     }
   }
@@ -48,8 +46,6 @@ class DeBayer2ConfigTest extends AnyFlatSpec {
 
   "MosaicOrder" should "lookup by name" in {
     for (v <- MosaicOrder.values) {
-      println(s"v: '$v', entryName: '${v.entryName}'")
-
       MosaicOrder.withName(v.entryName) should be(v)
     }
   }

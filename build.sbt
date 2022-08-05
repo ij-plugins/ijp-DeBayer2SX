@@ -4,15 +4,15 @@ import java.net.URL
 
 name := "ijp-debayer2sx"
 
-ThisBuild / version := "1.3.2"
+ThisBuild / version := "1.3.2.1-SNAPSHOT"
 ThisBuild / organization := "net.sf.ij-plugins"
 ThisBuild / sonatypeProfileName := "net.sf.ij-plugins"
 ThisBuild / homepage := Some(new URL("https://github.com/ij-plugins/ijp-color"))
 ThisBuild / startYear := Some(2002)
-ThisBuild / licenses := Seq(("LGPL-2.1", new URL("http://opensource.org/licenses/LGPL-2.1")))
+ThisBuild / licenses := Seq(("LGPL-2.1", new URL("https://opensource.org/licenses/LGPL-2.1")))
 
-ThisBuild / scalaVersion := "2.13.7"
-ThisBuild / crossScalaVersions := Seq("2.13.7", "2.12.15", "3.0.2")
+ThisBuild / scalaVersion := "2.13.8"
+ThisBuild / crossScalaVersions := Seq("2.13.8", "2.12.16", "3.0.2")
 
 publishArtifact := false
 publish / skip := true
@@ -66,13 +66,15 @@ val commonSettings = Seq(
       case None => Seq.empty[String]
     }
     ),
-  Compile / compile / javacOptions ++= Seq("-deprecation", "-Xlint", "-source", "1.8", "-target", "1.8"),
+  Compile / compile / javacOptions ++= Seq("-deprecation", "-Xlint", "--release", "8"),
   //
   libraryDependencies ++= Seq(
-    "net.imagej" % "ij" % "1.53i",
-    "org.scalatest" %% "scalatest" % "3.2.10" % "test"
+    "net.imagej" % "ij" % "1.53s",
+    "org.scalatest" %% "scalatest" % "3.2.11" % "test"
   ),
-  resolvers += Resolver.sonatypeRepo("snapshots"),
+  resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
+  //
+  exportJars := true,
   //
   autoCompilerPlugins := true,
   // Fork a new JVM for 'run' and 'test:run'
@@ -105,7 +107,7 @@ lazy val ijp_debayer2sx_core = project.in(file("ijp-debayer2sx-core"))
     libraryDependencies ++= {
       if (isScala2(scalaVersion.value)) {
         Seq(
-          "com.beachape" %% "enumeratum" % "1.6.1",
+          "com.beachape" %% "enumeratum" % "1.7.0",
           "io.github.metarank" %% "cfor" % "0.2"
         )
       } else {
