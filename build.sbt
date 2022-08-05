@@ -72,7 +72,7 @@ val commonSettings = Seq(
     "net.imagej" % "ij" % "1.53s",
     "org.scalatest" %% "scalatest" % "3.2.11" % "test"
   ),
-  resolvers += Resolver.sonatypeRepo("snapshots"),
+  resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
   //
   autoCompilerPlugins := true,
   // Fork a new JVM for 'run' and 'test:run'
