@@ -4,15 +4,15 @@ import java.net.URL
 
 name := "ijp-debayer2sx"
 
-ThisBuild / version := "1.3.3"
+ThisBuild / version := "1.3.3.1-SNAPSHOT"
 ThisBuild / organization := "net.sf.ij-plugins"
 ThisBuild / sonatypeProfileName := "net.sf.ij-plugins"
 ThisBuild / homepage := Some(new URL("https://github.com/ij-plugins/ijp-color"))
 ThisBuild / startYear := Some(2002)
 ThisBuild / licenses := Seq(("LGPL-2.1", new URL("https://opensource.org/licenses/LGPL-2.1")))
 
-ThisBuild / scalaVersion := "2.13.8"
-ThisBuild / crossScalaVersions := Seq("2.13.8", "2.12.16", "3.0.2")
+ThisBuild / scalaVersion := "3.2.1"
+ThisBuild / crossScalaVersions := Seq("3.2.1", "2.13.10", "2.12.17")
 
 publishArtifact := false
 publish / skip := true
@@ -46,12 +46,6 @@ val commonSettings = Seq(
         "-explain"
       )
     ),
-  scalacOptions ++= {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, 13)) => Seq("-target:8")
-      case _ => Seq.empty[String]
-    }
-  },
   Compile / doc / scalacOptions ++= Opts.doc.title("IJP Debayer2SX API"),
   Compile / doc / scalacOptions ++= Opts.doc.version(version.value),
   Compile / doc / scalacOptions ++= Seq(
@@ -69,8 +63,8 @@ val commonSettings = Seq(
   Compile / compile / javacOptions ++= Seq("-deprecation", "-Xlint", "--release", "8"),
   //
   libraryDependencies ++= Seq(
-    "net.imagej" % "ij" % "1.53s",
-    "org.scalatest" %% "scalatest" % "3.2.11" % "test"
+    "net.imagej" % "ij" % "1.54b",
+    "org.scalatest" %% "scalatest" % "3.2.15" % "test"
   ),
   resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
   //
@@ -104,11 +98,11 @@ lazy val ijp_debayer2sx_core = project.in(file("ijp-debayer2sx-core"))
     name := "ijp-debayer2sx-core",
     description := "IJP DeBayer2SX Core",
     commonSettings,
+    libraryDependencies += "io.github.metarank" %% "cfor" % "0.3",
     libraryDependencies ++= {
       if (isScala2(scalaVersion.value)) {
         Seq(
-          "com.beachape" %% "enumeratum" % "1.7.0",
-          "io.github.metarank" %% "cfor" % "0.2"
+          "com.beachape" %% "enumeratum" % "1.7.2"
         )
       } else {
         Seq.empty[ModuleID]
