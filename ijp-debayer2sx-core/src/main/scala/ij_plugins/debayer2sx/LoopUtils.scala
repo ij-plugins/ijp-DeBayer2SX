@@ -1,6 +1,6 @@
 /*
  * Image/J Plugins
- * Copyright (C) 2002-2021 Jarek Sacha
+ * Copyright (C) 2002-2023 Jarek Sacha
  * Author's email: jpsacha at gmail [dot] com
  *
  * This library is free software; you can redistribute it and/or
@@ -30,6 +30,8 @@ import java.awt.Rectangle
 object LoopUtils {
 
   final def crop(src: FloatProcessor, roi: Rectangle): FloatProcessor = {
+    import io.github.metarank.cfor.*
+
     val width = src.getWidth
     val pixels = src.getPixels.asInstanceOf[Array[Float]]
     val roiX = roi.x
@@ -39,20 +41,15 @@ object LoopUtils {
     val ip2 = new FloatProcessor(roiWidth, roiHeight)
     val pixels2 = ip2.getPixels.asInstanceOf[Array[Float]]
     //    for (ys <- roiY until roiY + roiHeight) {
-
-    var ys = roiY
-    while (ys < roiY + roiHeight) {
+    cfor(roiY)(_ < roiY + roiHeight, _ + 1) { ys =>
       var offset1 = (ys - roiY) * roiWidth
       var offset2 = ys * width + roiX
       //      for (xs <- 0 until roiWidth) {
-      var xs = 0
-      while (xs < roiWidth) {
+      cfor(0)(_ < roiWidth, _ + 1) { _ =>
         pixels2(offset1) = pixels(offset2)
         offset1 += 1
         offset2 += 1
-        xs += 1
       }
-      ys += 1
     }
     ip2
   }
@@ -69,25 +66,26 @@ object LoopUtils {
     * @param bpp bits per pixel
     */
   final def checkImg(ip: FloatProcessor, bpp: Int): Unit = {
+    import io.github.metarank.cfor.*
+
     val maxVal = (math.pow(2, bpp) - 1).toFloat
     val pixels = ip.getPixels.asInstanceOf[Array[Float]]
 
     //    for (i <- pixels.indices) {
-    var i = 0
-    while (i < pixels.length) {
+    cfor(0)(_ < pixels.length, _ + 1) { i =>
       val v = pixels(i)
       if (v > maxVal) {
         pixels(i) = maxVal
       } else if (v < 0) {
         pixels(i) = 0
       }
-
-      i += 1
     }
   }
 
   @inline
   final def slice(src: FloatProcessor, srcRangeX: Range, srcRangeY: Range): FloatProcessor = {
+    import io.github.metarank.cfor.*
+
     // bay(1:2:m,2:2:n)
     val _srcRangeX = if (srcRangeX == FR) Range(0, src.getWidth) else srcRangeX
     val _srcRangeY = if (srcRangeY == FR) Range(0, src.getHeight) else srcRangeY
@@ -103,21 +101,14 @@ object LoopUtils {
     val dst = new FloatProcessor(dstWidth, dstHeight)
     val dstPixels = dst.getPixels.asInstanceOf[Array[Float]]
 
-    var y = yStart
-    while (y < yEnd) {
+    cfor(yStart)(_ < yEnd, _ + yStep) { y =>
       val srcOffsetY = y * srcWidth
       val dstY = (y - _srcRangeY.start) / _srcRangeY.step
       val dstOffsetY = dstY * dstWidth
-
-      var x = xStart
-      while (x < xEnd) {
+      cfor(xStart)(_ < xEnd, _ + xStep) { x =>
         val dstX = (x - _srcRangeX.start) / _srcRangeX.step
         dstPixels(dstX + dstOffsetY) = srcPixels(x + srcOffsetY)
-
-        x += xStep
       }
-
-      y += yStep
     }
     dst
   }
@@ -153,6 +144,7 @@ object LoopUtils {
                         srcRangeX: Range,
                         srcRangeY: Range
                       ): Unit = {
+    import io.github.metarank.cfor.*
 
     val _dstRangeX = if (dstRangeX == FR) Range(0, dstIP.getWidth) else dstRangeX
     val _dstRangeY = if (dstRangeY == FR) Range(0, dstIP.getHeight) else dstRangeY
@@ -162,25 +154,19 @@ object LoopUtils {
     val (dstXStart, dstXEnd, dstXStep) = sortedRangeParams(_dstRangeX)
     val (dstYStart, dstYEnd, dstYStep) = sortedRangeParams(_dstRangeY)
 
-    var y = dstYStart
-    while (y < dstYEnd) {
+    cfor(dstYStart)(_ < dstYEnd, _ + dstYStep) { y =>
       val indexY = (y - _dstRangeY.start) / _dstRangeY.step
       val srcY = _srcRangeY.start + indexY * _srcRangeY.step
       val srcYOffset = srcY * srcIP.getWidth
       val dstYOffset = y * dstIP.getWidth
 
-      var x = dstXStart
-      while (x < dstXEnd) {
+      cfor(dstXStart)(_ < dstXEnd, _ + dstXStep) { x =>
         val indexX = (x - _dstRangeX.start) / _dstRangeX.step
         val srcX = _srcRangeX.start + indexX * _srcRangeX.step
 
         val v = srcIP.getf(srcX + srcYOffset)
         dstIP.setf(x + dstYOffset, v)
-
-        x += dstXStep
       }
-
-      y += dstYStep
     }
   }
 

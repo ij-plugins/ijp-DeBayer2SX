@@ -104,11 +104,11 @@ lazy val ijp_debayer2sx_core = project.in(file("ijp-debayer2sx-core"))
     name := "ijp-debayer2sx-core",
     description := "IJP DeBayer2SX Core",
     commonSettings,
+    libraryDependencies += "io.github.metarank" %% "cfor" % "0.3",
     libraryDependencies ++= {
       if (isScala2(scalaVersion.value)) {
         Seq(
-          "com.beachape" %% "enumeratum" % "1.7.2",
-          "io.github.metarank" %% "cfor" % "0.3"
+          "com.beachape" %% "enumeratum" % "1.7.2"
         )
       } else {
         Seq.empty[ModuleID]
