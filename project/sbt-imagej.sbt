@@ -1,1 +1,2 @@
-addSbtPlugin("net.sf.ij-plugins" % "sbt-imagej" % "2.1.0")
+// [[https://github.com/jpsacha/sbt-imagej]]
+addSbtPlugin("net.sf.ij-plugins" % "sbt-imagej" % "2.2.1")

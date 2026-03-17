@@ -1,51 +1,94 @@
-import xerial.sbt.Sonatype.GitHubHosting
-
-import java.net.URL
-
 name := "ijp-debayer2sx"
 
-ThisBuild / version := "1.3.4"
-ThisBuild / organization := "net.sf.ij-plugins"
-ThisBuild / sonatypeProfileName := "net.sf.ij-plugins"
-ThisBuild / homepage := Some(new URL("https://github.com/ij-plugins/ijp-color"))
-ThisBuild / startYear := Some(2002)
-ThisBuild / licenses := Seq(("LGPL-2.1", new URL("https://opensource.org/licenses/LGPL-2.1")))
+//
+// Environment variables used by the build:
+// GRAPHVIZ_DOT_PATH - Full path to Graphviz dot utility. If not defined, Scaladoc will be built without diagrams.
+// JAR_BUILT_BY      - Name to be added to Jar metadata field "Built-By" (defaults to System.getProperty("user.name")
+//
 
-ThisBuild / scalaVersion := "3.2.1"
-ThisBuild / crossScalaVersions := Seq("3.2.1", "2.13.10", "2.12.17")
+ThisBuild / version := "1.3.4.1-SNAPSHOT"
+ThisBuild / scalaVersion := "3.3.7"
+ThisBuild / organization := "net.sf.ij-plugins"
+ThisBuild / homepage := Some(url("https://github.com/ij-plugins/ijp-color"))
+ThisBuild / startYear := Some(2002)
+ThisBuild / licenses := Seq("LGPL-2.1" -> url("https://opensource.org/licenses/LGPL-2.1"))
+ThisBuild / organizationHomepage := Some(url("https://github.com/ij-plugins"))
+ThisBuild / scmInfo := Option(
+  ScmInfo(
+    url("https://github.com/ij-plugins/ijp-DeBayer2SX/issues"),
+    "scm:https://github.com/ij-plugins/ijp-DeBayer2SX.git"
+  )
+)
+
+// Resolvers
+// Add snapshots to the root project to enable compilation with Scala SNAPSHOT compiler,
+// e.g., 2.11.0-SNAPSHOT
+ThisBuild / resolvers += Resolver.sonatypeCentralSnapshots
+ThisBuild / resolvers += Resolver.mavenLocal
 
 publishArtifact := false
 publish / skip := true
 
-/** Return `true` if scala version corresponds to Scala 2, `false` otherwise */
-def isScala2(scalaVersion: String): Boolean = {
-  CrossVersion.partialVersion(scalaVersion) match {
-    case Some((2, _)) => true
-    case _ => false
-  }
-}
+// Set the Java version target for compatibility for the current FIJI distribution
+// We do not want to be over the FIJI Java version.
+lazy val javaTargetVersion = "21"
 
-val commonSettings = Seq(
+lazy val libCFor = "io.github.metarank" %% "cfor" % "0.3"
+lazy val libImageJ = "net.imagej" % "ij" % "1.54p"
+lazy val libScalaTest = "org.scalatest" %% "scalatest" % "3.2.19"
+
+lazy val ijp_debayer2sx_core = project.in(file("ijp-debayer2sx-core"))
+  .settings(
+    name := "ijp-debayer2sx-core",
+    description := "IJP DeBayer2SX Core",
+    commonSettings,
+    libraryDependencies += libCFor
+  )
+
+lazy val ijp_debayer2sx_plugins = project.in(file("ijp-debayer2sx-plugins"))
+  .settings(
+    name := "ijp-debayer2sx-plugins",
+    description := "IJP DeBayer2SX ImageJ Plugins",
+    commonSettings
+  )
+  .dependsOn(ijp_debayer2sx_core)
+
+lazy val ijp_debayer2sx_demos = project.in(file("ijp-debayer2sx-demos"))
+  .settings(
+    name := "ijp-debayer2sx-demos",
+    description := "IJP DeBayer2SX Demos",
+    commonSettings,
+    publishArtifact := false,
+    publish / skip := true
+  )
+  .dependsOn(ijp_debayer2sx_core)
+
+lazy val ijp_debayer2sx_experimental = project.in(file("ijp-debayer2sx-experimental"))
+  .settings(
+    name := "ijp-debayer2sx-experimental",
+    description := "Experimental Features",
+    commonSettings,
+    publishArtifact := false,
+    publish / skip := true
+  )
+  .dependsOn(ijp_debayer2sx_core)
+
+// Common settings
+lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
     "-encoding",
     "UTF-8",
     "-unchecked",
     "-deprecation",
     "-feature",
+    "-explain",
+    "-explain-types",
+    "-rewrite",
+    "-source:3.3-migration",
+    "-Wunused:all",
     "-release",
-    "8"
-  ) ++ (
-    if (isScala2(scalaVersion.value))
-      Seq(
-        "-Xlint",
-        "-explaintypes",
-        "-Xsource:3"
-      )
-    else
-      Seq(
-        "-explain"
-      )
-    ),
+    javaTargetVersion
+  ),
   Compile / doc / scalacOptions ++= Opts.doc.title("IJP Debayer2SX API"),
   Compile / doc / scalacOptions ++= Opts.doc.version(version.value),
   Compile / doc / scalacOptions ++= Seq(
@@ -60,13 +103,12 @@ val commonSettings = Seq(
       case None => Seq.empty[String]
     }
     ),
-  Compile / compile / javacOptions ++= Seq("-deprecation", "-Xlint", "--release", "8"),
+  Compile / compile / javacOptions ++= Seq("-deprecation", "-Xlint", "--release", javaTargetVersion),
   //
   libraryDependencies ++= Seq(
-    "net.imagej" % "ij" % "1.54b",
-    "org.scalatest" %% "scalatest" % "3.2.15" % "test"
+    libImageJ,
+    libScalaTest % "test"
   ),
-  resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
   //
   exportJars := true,
   //
@@ -78,65 +120,8 @@ val commonSettings = Seq(
   // Instruct `clean` to delete created plugins subdirectory created by `ijRun`/`ijPrepareRun`.
   cleanFiles += ijPluginsDir.value,
   //
-  manifestSetting,
-  // Setup publishing
-  publishMavenStyle := true,
-  sonatypeProjectHosting := Some(GitHubHosting("ij-plugins", "ijp-debayer2sx", "jpsacha@gmail.com")),
-  publishTo := sonatypePublishToBundle.value,
-  developers := List(
-    Developer(
-      id = "jpsacha",
-      name = "Jarek Sacha",
-      email = "jpsacha@gmail.com",
-      url = url("https://github.com/jpsacha")
-    )
-  )
+  manifestSetting
 )
-
-lazy val ijp_debayer2sx_core = project.in(file("ijp-debayer2sx-core"))
-  .settings(
-    name := "ijp-debayer2sx-core",
-    description := "IJP DeBayer2SX Core",
-    commonSettings,
-    libraryDependencies += "io.github.metarank" %% "cfor" % "0.3",
-    libraryDependencies ++= {
-      if (isScala2(scalaVersion.value)) {
-        Seq(
-          "com.beachape" %% "enumeratum" % "1.7.2"
-        )
-      } else {
-        Seq.empty[ModuleID]
-      }
-    }
-  )
-
-lazy val ijp_debayer2sx_plugins = project.in(file("ijp-debayer2sx-plugins"))
-  .settings(
-    name        := "ijp-debayer2sx-plugins",
-    description := "IJP DeBayer2SX ImageJ Plugins",
-    commonSettings
-  )
-  .dependsOn(ijp_debayer2sx_core)
-
-lazy val ijp_debayer2sx_demos = project.in(file("ijp-debayer2sx-demos"))
-  .settings(
-    commonSettings,
-    name := "ijp-debayer2sx-demos",
-    description := "IJP DeBayer2SX Demos",
-    publishArtifact := false,
-    publish / skip := true
-  )
-  .dependsOn(ijp_debayer2sx_core)
-
-lazy val ijp_debayer2sx_experimental = project.in(file("ijp-debayer2sx-experimental"))
-  .settings(
-    commonSettings,
-    name := "ijp-debayer2sx-experimental",
-    description := "Experimental Features",
-    publishArtifact := false,
-    publish / skip := true
-  )
-  .dependsOn(ijp_debayer2sx_core)
 
 lazy val manifestSetting = packageOptions += {
   Package.ManifestAttributes(
@@ -152,6 +137,26 @@ lazy val manifestSetting = packageOptions += {
     "Implementation-Vendor" -> organization.value
   )
 }
+
+//
+// Customize Java style publishing
+//
+// Enables publishing to maven repo
+ThisBuild / publishMavenStyle := true
+ThisBuild / Test / publishArtifact := false
+ThisBuild / publishTo := {
+  val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
+  if (isSnapshot.value) Some("central-snapshots" at centralSnapshots)
+  else localStaging.value
+}
+ThisBuild / developers := List(
+  Developer(
+    id = "jpsacha",
+    name = "Jarek Sacha",
+    email = "jpsacha@gmail.com",
+    url = url("https://github.com/jpsacha")
+  )
+)
 
 // Enable and customize `sbt-imagej` plugin
 enablePlugins(SbtImageJ)
