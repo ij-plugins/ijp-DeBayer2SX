@@ -6,7 +6,7 @@ name := "ijp-debayer2sx"
 // JAR_BUILT_BY      - Name to be added to Jar metadata field "Built-By" (defaults to System.getProperty("user.name")
 //
 
-ThisBuild / version := "1.3.4.1-SNAPSHOT"
+ThisBuild / version := "1.3.5"
 ThisBuild / scalaVersion := "3.3.7"
 ThisBuild / organization := "net.sf.ij-plugins"
 ThisBuild / homepage := Some(url("https://github.com/ij-plugins/ijp-color"))
