@@ -2,10 +2,10 @@
 [Bayer-pattern][bayer-filter] image to color image converters.
 
 [![Scala CI](https://github.com/ij-plugins/ijp-DeBayer2SX/actions/workflows/scala.yml/badge.svg)](https://github.com/ij-plugins/ijp-DeBayer2SX/actions/workflows/scala.yml)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.sf.ij-plugins/ijp-debayer2sx-core_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.sf.ij-plugins/ijp-debayer2sx-core_2.13)
+[![Maven Central](https://img.shields.io/maven-central/v/net.sf.ij-plugins/ijp-debayer2sx-core_3)](https://img.shields.io/maven-central/v/net.sf.ij-plugins/ijp-debayer2sx-core_3)
 [![Scaladoc](https://javadoc.io/badge2/net.sf.ij-plugins/ijp-debayer2sx-core_2.13/scaladoc.svg)](https://javadoc.io/doc/net.sf.ij-plugins/ijp-debayer2sx-core_2.13)
 
-Demasaicing (Bayer patter reconstruction) algorithms implemented, all support 8 bit and 16 bit input:
+Demasaicing (Bayer patter reconstruction) algorithms implemented, all support 8-bit and 16-bit input:
 
 * __DDFPD__ - published in: "Demosaicing with Directional Filtering and a Posteriori Decision", D. Menon, S. Andriani,
   and G. Calvagno, _IEEE Trans. Image Processing_, vol. 16 no. 1, Jan. 2007. Versions with and without refining are
@@ -24,7 +24,7 @@ Demasaicing (Bayer patter reconstruction) algorithms implemented, all support 8 
 Prebuild binaries are published with each [Release](https://github.com/ij-plugins/ijp-DeBayer2SX/releases).
 
 1. Look for in the asset section for an "ijp-debayer2sx_v.*.zip" file,
-2. download and unzip into ImageJ's `plugins` directory. It should create subdirectory "ij-plugins".
+2. download and unzip into ImageJ's `plugins` directory. It should create a subdirectory "ij-plugins".
 3. Restart ImageJ
 
 #### Option 2
